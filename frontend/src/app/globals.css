@@ -1,38 +1,27 @@
 @import "tailwindcss";
 
-/* 💡 Next.js App Router (Root Variables) */
+/* 💡 Root Variables (Chỉ cho Light Mode) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ffffff; /* Nền trắng */
+  --foreground: #171717;  /* Chữ đen */
 
   /* ĐỊNH NGHĨA FONT CHÍNH */
   --font-sans: Arial, Helvetica, sans-serif;
-  /* Nếu bạn muốn sử dụng Geist Font, bạn sẽ thay thế ở đây, ví dụ: 
-     --font-sans: var(--font-geist-sans); 
-     Nhưng hiện tại tôi giữ theo yêu cầu sử dụng Arial */
 }
 
-/* 🎨 Theme Inline (Thường dùng cho các biến màu sắc trong Tailwind) */
+/* 🎨 Theme Inline (Vẫn cần để Tailwind CSS hoạt động đúng) */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Đã loại bỏ định nghĩa font ở đây để tránh xung đột hoặc nhầm lẫn */
 }
 
-/* 🌙 Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-/* <body>: Áp dụng font và màu nền */
+/* <body>: Áp dụng font và màu nền cố định */
 body {
-  /* Áp dụng font-family được định nghĩa trong :root */
   font-family: var(--font-sans);
-
-  /* Áp dụng màu nền và màu chữ */
+  
+  /* Sử dụng màu sắc cố định (Light Mode) */
   background: var(--background);
   color: var(--foreground);
 }
+
+/* ĐÃ LOẠI BỎ toÀN BỘ PHẦN @media (prefers-color-scheme: dark) */
