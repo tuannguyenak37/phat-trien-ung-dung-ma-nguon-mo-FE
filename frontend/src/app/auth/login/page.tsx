@@ -4,11 +4,12 @@ import TabNav from "../TabNav";
 import banner from "../../../../public/login.jpg";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import APILogin from "../../../lib/API/user";
 import Loading from "../../../utils/loading/LoadingDots";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
+import { useTokenStore } from "@/lib/store/tokenStore";
 // Social Icons
 const GoogleIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -62,10 +63,15 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+  const queryClient = useQueryClient();
+  const setAccessToken = useTokenStore((state) => state.setAccessToken);
   const fethLogin = useMutation({
     mutationFn: (data: formData) => APILogin.APILogin(data),
     onSuccess: (res) => {
       console.log(res);
+      // 2. Lưu Token vào RAM (Zustand)
+      setAccessToken(res.data.accessToken);
+      queryClient.setQueryData(["user-profile"], res.data);
       router.push("/");
     },
   });
