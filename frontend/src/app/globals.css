@@ -1,27 +1,84 @@
 @import "tailwindcss";
 
-/* 💡 Root Variables (Chỉ cho Light Mode) */
+/* =====================================================
+   🌞 LIGHT MODE – BIẾN GỐC (Chỉ màu + font chung)
+===================================================== */
 :root {
-  --background: #ffffff; /* Nền trắng */
-  --foreground: #171717;  /* Chữ đen */
-
-  /* ĐỊNH NGHĨA FONT CHÍNH */
   --font-sans: Arial, Helvetica, sans-serif;
+  --background: #ffffff;
+  --foreground: #333333;
 }
 
-/* 🎨 Theme Inline (Vẫn cần để Tailwind CSS hoạt động đúng) */
+/* =====================================================
+   🧠 TAILWIND: BIỂU DIỄN DƯỚI DẠNG @theme inline
+===================================================== */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
 }
 
-/* <body>: Áp dụng font và màu nền cố định */
+/* =====================================================
+   ✨ BODY – ÁP DỤNG BIẾN TOÀN CỤC
+===================================================== */
 body {
   font-family: var(--font-sans);
-  
-  /* Sử dụng màu sắc cố định (Light Mode) */
   background: var(--background);
   color: var(--foreground);
 }
 
-/* ĐÃ LOẠI BỎ toÀN BỘ PHẦN @media (prefers-color-scheme: dark) */
+/* =====================================================
+   🎨 CUSTOM THEME – CÓ KEYFRAMES VÀ UTILITY RIÊNG
+===================================================== */
+@theme {
+  --font-serif: Merriweather, serif;
+
+  --animate-wiggle: wiggle 0.5s ease-in-out infinite;
+  --animate-flow-fire: flow-fire 3s linear infinite;
+
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(3deg);
+    }
+  }
+
+  @keyframes flow-fire {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@keyframes rise {
+  0% {
+    transform: translateY(100%) scale(1);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) scale(0);
+    opacity: 0;
+  }
+}
+
+.ember {
+  position: absolute;
+  bottom: -10px;
+  width: 4px;
+  height: 4px;
+  background-color: #ff4500; /* Màu cam đỏ */
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff4500, 0 0 20px #ff8c00; /* Glow effect */
+  animation: rise 4s infinite linear;
+  pointer-events: none; /* Không chặn click chuột */
+  z-index: 0;
+}

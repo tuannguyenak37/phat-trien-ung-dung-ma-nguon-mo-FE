@@ -16,5 +16,10 @@ const APIResigner = async (data: data) => {
 const APILogin = async (data: formData) => {
   return await axios.post("/users/login", data);
 };
-const UserAPI = { APIResigner, APILogin };
+
+const APIpublic_proflle = async (id: string) => {
+  return await axios.get(`/public/users/${id}`);
+};
+const UserAPI = { APIResigner, APILogin, APIpublic_proflle };
+
 export default UserAPI;

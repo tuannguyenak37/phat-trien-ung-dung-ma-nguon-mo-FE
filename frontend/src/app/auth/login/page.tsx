@@ -9,7 +9,7 @@ import APILogin from "../../../lib/API/user";
 import Loading from "../../../utils/loading/LoadingDots";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
-import { useTokenStore } from "@/lib/store/tokenStore";
+import { useAuthStore } from "@/lib/store/tokenStore";
 // Social Icons
 const GoogleIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -64,15 +64,38 @@ export default function LoginPage() {
     password: "",
   });
   const queryClient = useQueryClient();
-  const setAccessToken = useTokenStore((state) => state.setAccessToken);
+  // 👇 Lấy hàm setAuth (Lưu cả Token + User) thay vì chỉ setAccessToken
+  const setAuth = useAuthStore((state) => state.setAuth);
+
   const fethLogin = useMutation({
     mutationFn: (data: formData) => APILogin.APILogin(data),
     onSuccess: (res) => {
       console.log(res);
-      // 2. Lưu Token vào RAM (Zustand)
-      setAccessToken(res.data.accessToken);
-      queryClient.setQueryData(["user-profile"], res.data);
-      router.push("/");
+      const data = res.data;
+
+      // 1. Tạo object User để lưu vào RAM
+      const userInfo = {
+        user_id: data.user_id,
+        role: data.role,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      };
+
+      // 2. LƯU CẢ 2 VÀO RAM (Zustand)
+     
+      const token = data.access_token || data.accessToken;
+
+      setAuth(token, userInfo);
+
+   
+      queryClient.setQueryData(["user-profile"], data);
+
+      // 4. Điều hướng
+      if (data.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/");
+      }
     },
   });
   interface LoginErr {

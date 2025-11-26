@@ -1,12 +1,43 @@
-// store/tokenStore.ts
-import { create } from 'zustand';
+import { create } from "zustand";
 
-interface TokenState {
-  accessToken: string | null;
-  setAccessToken: (token: string | null) => void;
+// Định nghĩa kiểu User
+interface User {
+  user_id: string;
+  role: string; // Quan trọng để check Admin
+  firstName: string;
+  lastName: string;
+  url_avatar?: string | null;
 }
 
-export const useTokenStore = create<TokenState>((set) => ({
+interface AuthState {
+  accessToken: string | null;
+  user: User | null; // Thêm cái này
+  isAuthenticated: boolean;
+
+  // Hàm này lưu cả 2 vào RAM cùng lúc
+  setAuth: (token: string, user: User) => void;
+  setUser: (user: User) => void;
+  // Hàm logout xóa sạch RAM
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
   accessToken: null,
-  setAccessToken: (token) => set({ accessToken: token }),
+  user: null,
+  isAuthenticated: false,
+
+  setAuth: (token, user) =>
+    set({
+      accessToken: token,
+      user: user,
+      isAuthenticated: true,
+    }),
+  setUser: (user) => set({ user }),
+
+  logout: () =>
+    set({
+      accessToken: null,
+      user: null,
+      isAuthenticated: false,
+    }),
 }));

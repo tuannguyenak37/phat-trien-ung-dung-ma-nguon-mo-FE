@@ -1,57 +1,53 @@
-// providers/AuthProvider.tsx
 "use client";
 import { useEffect, useState } from "react";
 import axiosClient from "../../lib/API/axiosConfig";
-import { useTokenStore } from "../../lib/store/tokenStore";
+import { useAuthStore } from "../../lib/store/tokenStore";
+import { useRouter } from "next/navigation";
 
 export default function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const setAccessToken = useTokenStore((state) => state.setAccessToken);
-  const [isChecking, setIsChecking] = useState(true);
-
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const [isChecking, setIsChecking] = useState(true); // Mặc định là Đang check
+  const router = useRouter();
   useEffect(() => {
     const loadUserFromCookie = async () => {
       try {
-        console.log("🔄 Đang thử khôi phục phiên đăng nhập...");
-
-        // Gọi API refresh
-        const response = await axiosClient.post("/token/refresh"); // Check lại URL này
-
-        console.log("✅ Response từ Refresh API:", response.data);
-
-        // 👇 SỬA LẠI CHỖ NÀY: Lấy đúng key access_token
-        const newToken =
-          response.data?.access_token || response.data?.accessToken;
+        const response = await axiosClient.post("/token/refresh");
+        const data = response.data;
+        const newToken = data.access_token || data.accessToken;
 
         if (newToken) {
-          console.log("🔑 Tìm thấy token mới! Đang lưu vào Store...");
-          setAccessToken(newToken);
-        } else {
-          console.warn("⚠️ API trả về 200 nhưng không thấy access_token đâu!");
+          const userInfo = {
+            user_id: data.user_id,
+            role: data.role,
+            firstName: data.firstName,
+            lastName: data.lastName,
+          };
+          setAuth(newToken, userInfo);
         }
-      } catch (error: any) {
-        console.error(
-          "❌ Lỗi khôi phục phiên:",
-          error?.response?.data || error.message
-        );
-        // Token hết hạn hoặc lỗi mạng -> Kệ nó
+      } catch (error) {
+        console.log("❌ Không thể lấy user từ cookie:", error);
+        
+
       } finally {
+        // 👇 QUAN TRỌNG: Dù thành công hay thất bại, cũng báo là Check xong rồi
         setIsChecking(false);
       }
     };
 
     loadUserFromCookie();
-  }, [setAccessToken]);
+  }, [setAuth]);
 
-  if (isChecking)
-    return (
-      <div className="h-screen flex items-center justify-center bg-gray-50 text-blue-600">
-        Loading App...
-      </div>
-    );
+  // 👇 CHẶN RENDER TOÀN CỤC KHI F5
+  // Khi F5, isChecking = true -> Return null luôn.
+  // Không render UserGlobalListener -> useUser không chạy -> Không lỗi undefined.
+  if (isChecking) {
+    // Bạn có thể return null hoặc loading spinner
+    return null;
+  }
 
   return <>{children}</>;
 }

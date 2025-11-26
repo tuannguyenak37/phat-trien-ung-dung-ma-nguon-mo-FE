@@ -7,7 +7,7 @@ export default function QueryProvider({
 }: {
   children: React.ReactNode;
 }) {
-  // Tạo client 1 lần duy nhất
+  
   const [queryClient] = useState(
     () =>
       new QueryClient({
