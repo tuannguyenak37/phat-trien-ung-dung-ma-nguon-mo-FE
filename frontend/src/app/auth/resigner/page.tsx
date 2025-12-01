@@ -9,6 +9,7 @@ import { useWatch } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import APIUser from "../../../lib/API/user";
 import Loading from "../../../utils/loading/LoadingDots";
+import { useRouter } from "next/navigation";
 
 const GoogleIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -69,12 +70,12 @@ type dataFeth = {
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
+ const router = useRouter()
   const fethResiger = useMutation({
     mutationFn: (data: dataFeth) => {
       return APIUser.APIResigner(data);
     },
-    onSuccess: () => {},
+    onSuccess: () => {router.push("/auth/login")},
     onError: (err) => console.log("loooix", err),
   });
 
@@ -87,7 +88,7 @@ export default function SignupPage() {
   } = useForm<FormData>();
 
   const password = useWatch({ control, name: "password", defaultValue: "" });
-
+ 
   const onSubmit = (data: FormData) => {
     const data_f: dataFeth = {
       email: data.email,
@@ -95,6 +96,7 @@ export default function SignupPage() {
       firstName: data.firstName,
       lastName: data.lastName,
     };
+
     fethResiger.mutate(data_f);
   };
 

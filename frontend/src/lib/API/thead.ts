@@ -1,9 +1,8 @@
-import { Thread } from './../../types/home';
 import axios from "./axiosConfig";
 import { HomeList } from "@/types/home";
 
 const APIhome = async (data: HomeList) => {
-  return await axios.get("/public", {
+  return await axios.get("/threads", {
     params: data,
   });
 };

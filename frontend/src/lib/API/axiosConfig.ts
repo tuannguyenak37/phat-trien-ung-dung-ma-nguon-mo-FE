@@ -1,20 +1,23 @@
-// lib/axiosConfig.ts
 import axios from "axios";
 import { useAuthStore } from "../store/tokenStore";
 
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_URL_BACKEND || "http://localhost:5000/api",
   timeout: 10000,
-  withCredentials: true,
+  withCredentials: true, // Quan trọng: Để gửi kèm Cookie Refresh Token
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// 1. Request Interceptor (Giữ nguyên)
+// =================================================================
+// 1. REQUEST INTERCEPTOR
+// =================================================================
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Chỉ lấy từ Zustand (vì bạn không lưu Access Token ở LocalStorage/Cookie)
     const token = useAuthStore.getState().accessToken;
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -23,65 +26,68 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 2. Response Interceptor (ĐÃ SỬA LỖI LOOP)
+// =================================================================
+// 2. RESPONSE INTERCEPTOR
+// =================================================================
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // 👇 1. QUAN TRỌNG: Nếu API bị lỗi chính là API refresh token thì DỪNG NGAY.
-    // Không cố refresh nữa để tránh lặp vô tận.
+    // A. Chặn vòng lặp: Nếu chính API refresh bị lỗi thì dừng ngay
     if (originalRequest.url && originalRequest.url.includes("/token/refresh")) {
       return Promise.reject(error);
     }
 
-    // Nếu lỗi 401 và chưa từng thử lại
+    // B. Xử lý lỗi 401 (Unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        console.log("🔄 Access Token hết hạn, đang thử refresh ngầm...");
+        console.log("🔄 Access Token hết hạn/thiếu, đang thử refresh bằng Cookie...");
 
-        // Gọi API Refresh Token bằng axios gốc
+        // Gọi API Refresh (Dùng axios gốc để tránh interceptor lặp lại)
+        // Backend sẽ đọc Refresh Token từ Cookie HttpOnly
         const refreshResponse = await axios.post(
           `${
             process.env.NEXT_PUBLIC_URL_BACKEND || "http://localhost:5000/api"
           }/token/refresh`,
           {},
-          { withCredentials: true }
+          { withCredentials: true } // BẮT BUỘC
         );
 
         const data = refreshResponse.data;
         const newAccessToken = data.access_token || data.accessToken;
 
         if (newAccessToken) {
+          // 1. Lưu vào Store
           const userInfo = {
             user_id: data.user_id,
             role: data.role,
             firstName: data.firstName,
             lastName: data.lastName,
           };
-
           useAuthStore.getState().setAuth(newAccessToken, userInfo);
 
-          // Cập nhật header cho request cũ và gọi lại
+          // 2. Gắn token mới vào header request cũ
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          
+          // 3. Gọi lại request cũ
           return axiosInstance(originalRequest);
         }
       } catch (refreshError) {
-        console.error("❌ Refresh thất bại (Cookie hết hạn):", refreshError);
+        console.error("❌ Refresh thất bại (Cookie hết hạn hoặc không tồn tại):", refreshError);
         
         // Logout sạch sẽ
         useAuthStore.getState().logout();
 
-        // 👇 2. QUAN TRỌNG: Kiểm tra xem đang ở đâu trước khi reload
-        // Nếu đang ở trang login rồi thì ĐỪNG reload nữa
+        // Redirect về login (Chỉ làm nếu không phải trang public)
         if (typeof window !== "undefined") {
             const currentPath = window.location.pathname;
-            // Danh sách các trang không cần redirect (Login, Register...)
-            const publicPaths = ["/auth/login", "/login", "/register"];
+            const publicPaths = ["/auth/login", "/login", "/register", "/home", "/"];
             
-            if (!publicPaths.includes(currentPath)) {
+            // Nếu trang hiện tại KHÔNG nằm trong danh sách public thì mới redirect
+            if (!publicPaths.some(path => currentPath.startsWith(path))) {
                  window.location.href = "/auth/login"; 
             }
         }

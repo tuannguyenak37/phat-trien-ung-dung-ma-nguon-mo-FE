@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import axiosClient from "../../lib/API/axiosConfig";
-import { useAuthStore } from "../../lib/store/tokenStore";
-import { useRouter } from "next/navigation";
+// 👇 Đảm bảo đường dẫn này đúng với file axiosConfig bạn vừa sửa lúc nãy
+import axiosClient from "@/lib/API/axiosConfig"; 
+import { useAuthStore } from "@/lib/store/tokenStore";
+// Xóa import useRouter thừa
 
 export default function AuthProvider({
   children,
@@ -10,13 +11,16 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const setAuth = useAuthStore((state) => state.setAuth);
-  const [isChecking, setIsChecking] = useState(true); // Mặc định là Đang check
-  const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
+
   useEffect(() => {
     const loadUserFromCookie = async () => {
       try {
+        // Gọi API refresh để lấy lại session
         const response = await axiosClient.post("/token/refresh");
         const data = response.data;
+        
+        // Check cả 2 trường hợp tên biến
         const newToken = data.access_token || data.accessToken;
 
         if (newToken) {
@@ -26,14 +30,15 @@ export default function AuthProvider({
             firstName: data.firstName,
             lastName: data.lastName,
           };
+          // Nạp lại vào Store
           setAuth(newToken, userInfo);
+          console.log("✅ AuthProvider: Khôi phục đăng nhập thành công!");
         }
       } catch (error) {
-        console.log("❌ Không thể lấy user từ cookie:", error);
-        
-
+        // Lỗi này là bình thường nếu user là khách (chưa từng đăng nhập)
+        // console.log("ℹ️ User là khách hoặc phiên hết hạn.");
       } finally {
-        // 👇 QUAN TRỌNG: Dù thành công hay thất bại, cũng báo là Check xong rồi
+        // 👇 Cho phép app render
         setIsChecking(false);
       }
     };
@@ -41,12 +46,17 @@ export default function AuthProvider({
     loadUserFromCookie();
   }, [setAuth]);
 
-  // 👇 CHẶN RENDER TOÀN CỤC KHI F5
-  // Khi F5, isChecking = true -> Return null luôn.
-  // Không render UserGlobalListener -> useUser không chạy -> Không lỗi undefined.
+  // 👇 HIỂN THỊ LOADING THAY VÌ TRANG TRẮNG
   if (isChecking) {
-    // Bạn có thể return null hoặc loading spinner
-    return null;
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-black text-white">
+        {/* Bạn có thể thay bằng Icon Logo Messmer xoay tròn */}
+        <div className="flex flex-col items-center gap-4">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-red-600 border-t-transparent"></div>
+            <p className="text-sm font-mono text-gray-400 animate-pulse">Summoning Messmer...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

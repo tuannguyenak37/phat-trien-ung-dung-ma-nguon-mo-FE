@@ -7,7 +7,9 @@ export interface Media {
   media_type: string;
   file_url: string;
 }
-
+export interface VoteStats {
+  is_voted: number;
+}
 export interface Tag {
   tag_id: string;
   name: string;
@@ -22,8 +24,22 @@ export interface Thread {
   created_at: string;
   tags: Tag[];
   media: Media[];
-  like_count?: number;
-  reply_count?: number;
+comment_count: number;
+  upvote_count: number;
+  downvote_count: number;
+  vote_stats?: VoteStats;
+}
+export interface ThreadListResponse {
+  total: number;
+  page: number;
+  size: number;
+  data: Thread[];
+}
+export interface ThreadListResponse {
+  total: number;
+  page: number;
+  size: number;
+  data: Thread[]; // Danh sách bài viết nằm trong 'data'
 }
 
 export interface ApiResponse {
