@@ -34,7 +34,11 @@ export const useUser = () => {
           role: userData.role,
           firstName: userData.firstName,
           lastName: userData.lastName,
+          reputation_score: userData.reputation_score,
+          url_avatar: userData.url_avatar,
+          description: userData.description
         };
+        console.log("dữ liệu ",newUserInfo)
 
         // Chỉ set khi có role để tránh set rác vào store
         if (newUserInfo.role) {

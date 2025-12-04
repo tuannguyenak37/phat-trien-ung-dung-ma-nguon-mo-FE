@@ -1,132 +1,251 @@
-import React from "react";
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { useAuthStore } from "@/lib/store/tokenStore";
 import {
   MagnifyingGlassIcon,
   BellIcon,
   Bars3Icon,
+  XMarkIcon,
   ChevronDownIcon,
+  UserCircleIcon,
+  Cog6ToothIcon,
+  ArrowRightStartOnRectangleIcon,
+  FireIcon
 } from "@heroicons/react/24/outline";
-import { FireIcon as FireIconSolid } from "@heroicons/react/24/solid";
+import { motion, AnimatePresence } from "framer-motion";
 
-const Navbar = () => {
+// --- LOGO COMPONENT (Modernized) ---
+const Logo = () => (
+  <div className="flex items-center gap-2.5 group">
+    <div className="relative w-10 h-10 flex items-center justify-center bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+      <FireIcon className="w-6 h-6 text-primary" />
+    </div>
+    <div className="flex flex-col">
+      <span className="font-extrabold text-xl tracking-tight text-gray-900 leading-none group-hover:text-primary transition-colors">
+        Messmer
+      </span>
+      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
+        Community
+      </span>
+    </div>
+  </div>
+);
+
+// --- NAV LINKS DATA ---
+const NAV_ITEMS = [
+  { label: "Bảng tin", href: "/" },
+  { label: "Thảo luận", href: "/forums" },
+  { label: "Thư viện", href: "/gallery" },
+];
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const { user, logout } = useAuthStore();
+  
+  // State quản lý Menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  
+  // Ref để click outside đóng menu
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Đóng mobile menu khi chuyển trang
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#050505] border-b border-red-900/40 shadow-[0_10px_30px_-10px_rgba(220,38,38,0.15)] backdrop-blur-xl">
-      {/* Texture nền hạt (Noise) để tạo độ nhám điện ảnh */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none"></div>
-
-      <div className="container mx-auto px-4 md:px-6 h-20 flex items-center justify-between relative z-10">
-        {/* --- 1. LOGO: SERPENT & FIRE --- */}
-        <Link href="/" className="flex items-center gap-4 group">
-          {/* Container Logo */}
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            {/* Lớp nền đen tròn phía sau */}
-            <div className="absolute inset-1 rounded-full bg-black shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
-
-            {/* SVG CON RẮN VÀNG (Custom drawn SVG) */}
-            <svg
-              viewBox="0 0 100 100"
-              className="absolute w-16 h-16 text-yellow-600/80 drop-shadow-md group-hover:text-yellow-500 transition-colors duration-500"
-            >
-              {/* Thân rắn cuộn tròn */}
-              <path
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                d="M 50 90 C 25 90 10 70 10 50 C 10 30 25 10 50 10 C 70 10 85 20 90 40"
-                className="opacity-80"
-              />
-              {/* Đầu rắn (giả lập hình tam giác cách điệu ở trên) */}
-              <path
-                fill="currentColor"
-                d="M 90 40 L 95 30 L 85 30 Z"
-                className="origin-center rotate-12"
-              />
-              {/* Vảy rắn (Các chấm nhỏ trang trí dọc thân) */}
-              <circle cx="20" cy="50" r="1.5" fill="currentColor" />
-              <circle cx="30" cy="80" r="1.5" fill="currentColor" />
-              <circle cx="50" cy="88" r="1.5" fill="currentColor" />
-            </svg>
-
-            {/* Ngọn lửa ở tâm */}
-            <FireIconSolid className="relative w-6 h-6 text-red-600 animate-pulse drop-shadow-[0_0_8px_#ef4444]" />
-          </div>
-
-          {/* Tên thương hiệu */}
-          <div className="flex flex-col">
-            <h1 className="font-serif text-2xl font-bold tracking-[0.15em] text-gray-100 uppercase leading-none group-hover:text-red-500 transition-colors drop-shadow-sm">
-              Messmer
-            </h1>
-            {/* Đường gạch trang trí thay cho chữ cũ */}
-            <div className="w-full h-[2px] mt-1 gradient-to-r from-red-900 via-red-600 to-transparent opacity-60"></div>
-          </div>
-        </Link>
-
-        {/* --- 2. MENU NAVIGATION --- */}
-        <nav className="hidden md:flex items-center gap-1">
-          {["Forums", "Gallery", "Members"].map((item) => (
-            <Link
-              key={item}
-              href={`/${item.toLowerCase()}`}
-              className="relative px-5 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors group/nav"
-            >
-              <span className="relative z-10">{item}</span>
-
-              {/* Hiệu ứng nền khi hover: Lửa cháy mờ từ dưới lên */}
-              <div className="absolute inset-0 gradient-to-t from-red-900/40 to-transparent opacity-0 group-hover/nav:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-
-              {/* Hiệu ứng viền đáy sáng rực */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-red-500 group-hover/nav:w-3/4 transition-all duration-300 shadow-[0_0_10px_#ef4444]"></div>
+    <>
+      <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-xl border-b border-gray-200 supports-[backdrop-filter]:bg-white/60">
+        <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4">
+          
+          {/* 1. LEFT: LOGO & DESKTOP NAV */}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="shrink-0">
+              <Logo />
             </Link>
-          ))}
-        </nav>
 
-        {/* --- 3. RIGHT ACTIONS --- */}
-        <div className="flex items-center gap-5">
-          {/* SEARCH BOX: Đã sửa lại cho rõ nét */}
-          <div className="hidden lg:block relative group w-64">
-            {/* Viền ngoài input với hiệu ứng focus */}
-            <div className="absolute -inset-0.5 gradient-to-r from-red-900 to-gray-800 rounded-md opacity-30 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-500 blur-[1px]"></div>
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center space-x-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                      isActive 
+                        ? "text-primary bg-primary/10" 
+                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-            <div className="relative flex items-center bg-[#0f0f0f] rounded-md overflow-hidden border border-gray-800 group-focus-within:border-red-700 transition-colors">
-              <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 ml-3 mr-2" />
+          {/* 2. MIDDLE: SEARCH BAR (Responsive) */}
+          <div className={`hidden md:block flex-1 max-w-md transition-all duration-300 ${isSearchFocused ? "scale-105" : ""}`}>
+            <div className={`relative flex items-center w-full rounded-full transition-all duration-200 ${
+                isSearchFocused 
+                ? "bg-white ring-2 ring-primary/20 shadow-lg shadow-primary/5" 
+                : "bg-gray-100 hover:bg-gray-200/70"
+            }`}>
+              <MagnifyingGlassIcon className={`w-5 h-5 ml-4 ${isSearchFocused ? "text-primary" : "text-gray-400"}`} />
               <input
                 type="text"
-                placeholder="Search topic..."
-                className="w-full bg-transparent text-gray-100 text-sm py-2 placeholder-gray-500 outline-none font-medium"
+                placeholder="Tìm kiếm chủ đề, bài viết..."
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                className="w-full bg-transparent border-none focus:ring-0 text-sm text-gray-900 placeholder-gray-500 py-2.5 pl-3 pr-4 rounded-full"
               />
             </div>
           </div>
 
-          <div className="h-6 w-[1px] bg-gray-800 mx-1"></div>
-
-          {/* User & Notification */}
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 text-gray-400 hover:text-red-500 transition-colors">
-              <BellIcon className="w-6 h-6" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full shadow-[0_0_5px_#dc2626]"></span>
+          {/* 3. RIGHT: ACTIONS & USER */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            
+            {/* Search Icon Mobile */}
+            <button className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-full">
+               <MagnifyingGlassIcon className="w-6 h-6" />
             </button>
 
-            <button className="flex items-center gap-2 group pl-1">
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-yellow-700 to-yellow-900 p-[1px] group-hover:from-red-600 group-hover:to-orange-500 transition-all">
-                <img
-                  src="https://api.dicebear.com/9.x/avataaars/svg?seed=Messmer"
-                  alt="User"
-                  className="rounded-full bg-black object-cover h-full w-full"
-                />
+            {/* Notification */}
+            <button className="relative p-2 text-gray-500 hover:text-primary hover:bg-primary/5 rounded-full transition-all group">
+              <BellIcon className="w-6 h-6" />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+            </button>
+
+            <div className="h-6 w-[1px] bg-gray-200 hidden sm:block"></div>
+
+            {/* User Dropdown */}
+            {user ? (
+              <div className="relative" ref={profileRef}>
+                <button 
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm">
+                    {user.url_avatar ? (
+                        <Image src={user.url_avatar} alt="User" width={32} height={32} className="object-cover w-full h-full" />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                            {user.firstName?.charAt(0)}
+                        </div>
+                    )}
+                  </div>
+                  <ChevronDownIcon className={`w-4 h-4 text-gray-400 transition-transform duration-200 hidden sm:block ${isProfileOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                    {isProfileOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            transition={{ duration: 0.1 }}
+                            className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 origin-top-right"
+                        >
+                            <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                                <p className="text-sm font-bold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
+                                <p className="text-xs text-gray-500 truncate">@{user.firstName?.toLowerCase() || "user"}</p>
+                            </div>
+                            
+                            <div className="px-2 space-y-1">
+                                <Link href={`/profile/${user.user_id}`} onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-xl hover:bg-gray-50 hover:text-primary transition-colors">
+                                    <UserCircleIcon className="w-5 h-5" /> Trang cá nhân
+                                </Link>
+                                <Link href="/settings" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-xl hover:bg-gray-50 hover:text-primary transition-colors">
+                                    <Cog6ToothIcon className="w-5 h-5" /> Cài đặt
+                                </Link>
+                            </div>
+
+                            <div className="border-t border-gray-50 mt-2 pt-1 px-2">
+                                <button 
+                                    onClick={() => { logout(); setIsProfileOpen(false); }}
+                                    className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 rounded-xl hover:bg-red-50 transition-colors"
+                                >
+                                    <ArrowRightStartOnRectangleIcon className="w-5 h-5" /> Đăng xuất
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
               </div>
-              <ChevronDownIcon className="w-4 h-4 text-gray-500 group-hover:text-red-400 transition-colors hidden sm:block" />
+            ) : (
+                <div className="flex items-center gap-2">
+                    <Link href="/auth/login" className="text-sm font-semibold text-gray-600 hover:text-primary px-3 py-2">
+                        Đăng nhập
+                    </Link>
+                    <Link href="/auth/resigner" className="text-sm font-bold text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-full shadow-lg shadow-primary/20 transition-all hidden sm:block">
+                        Đăng ký
+                    </Link>
+                </div>
+            )}
+
+            {/* Mobile Menu Toggle */}
+            <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              {isMobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
             </button>
           </div>
-
-          {/* Mobile Toggle */}
-          <button className="md:hidden text-gray-300">
-            <Bars3Icon className="w-7 h-7" />
-          </button>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* --- MOBILE MENU OVERLAY --- */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+            <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="md:hidden fixed inset-x-0 top-16 bg-white border-b border-gray-200 shadow-2xl z-30 overflow-hidden"
+            >
+                <div className="p-4 space-y-4">
+                    {/* Mobile Search */}
+                    <div className="relative">
+                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input type="text" placeholder="Tìm kiếm..." className="w-full bg-gray-100 rounded-xl py-3 pl-10 text-sm outline-none focus:ring-2 focus:ring-primary/50" />
+                    </div>
+
+                    {/* Mobile Nav Links */}
+                    <nav className="flex flex-col space-y-1">
+                        {NAV_ITEMS.map((item) => (
+                            <Link 
+                                key={item.href}
+                                href={item.href}
+                                className={`px-4 py-3 rounded-xl text-sm font-semibold ${
+                                    pathname === item.href ? "bg-primary/10 text-primary" : "text-gray-600 hover:bg-gray-50"
+                                }`}
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
+                    </nav>
+                </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
-
-export default Navbar;

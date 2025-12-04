@@ -3,10 +3,10 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import UserAPI from "../../lib/API/user";
 import Image from "next/image";
-import avatarDefault from "../../../public/avatar-mac-dinh.jpg"; // Đổi tên biến tránh trùng
+import avatarDefault from "../../../public/avatar-mac-dinh.jpg";
 import Link from "next/link";
 import { UserTheadResponse } from "@/types/home";
-
+import ReputationBadge from "@/utils/ReputationBadge";
 const API_DOMAIN = process.env.NEXT_PUBLIC_URL_BACKEND_IMG || "http://localhost:8000";
 
 interface UserTheadProps {
@@ -18,40 +18,41 @@ export default function UserThead({ id }: UserTheadProps) {
     queryKey: ["user-profile", id],
     queryFn: () => UserAPI.APIpublic_proflle(id),
     enabled: !!id,
-    staleTime: 1000 * 60 * 5, // Cache 5 phút để đỡ gọi lại nhiều
+    staleTime: 1000 * 60 * 10, // Tăng cache lên 10 phút
   });
 
   const user = response?.data as UserTheadResponse | undefined;
 
-  // Hàm xử lý đường dẫn ảnh an toàn
-const getAvatarUrl = (url?: string | null) => {
+  const getAvatarUrl = (url?: string | null) => {
     if (!url) return avatarDefault;
     if (url.startsWith("http")) return url;
     return `${API_DOMAIN}/${url.replace(/^\//, "")}`;
   };
 
-  // 1. TRẠNG THÁI LOADING (SKELETON)
+  // 1. SKELETON LOADING (Chuyển sang màu sáng cho hợp nền trắng)
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 mb-3">
-        {/* Skeleton Avatar: Tròn xám */}
-        <div className="w-10 h-10 rounded-full bg-zinc-800 animate-pulse border border-white/5" />
+      <div className="flex items-center gap-3">
+        {/* Avatar Skeleton */}
+        <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
         
-        {/* Skeleton Text: Thanh ngang */}
-        <div className="flex flex-col gap-1.5">
-          <div className="h-3 w-24 bg-zinc-800 rounded animate-pulse" />
-          <div className="h-2 w-16 bg-zinc-800 rounded animate-pulse" />
+        {/* Text Skeleton */}
+        <div className="flex flex-col gap-2">
+          <div className="h-3.5 w-24 bg-gray-200 rounded animate-pulse" />
+          <div className="h-2.5 w-16 bg-gray-100 rounded animate-pulse" />
         </div>
       </div>
     );
   }
 
-  // 2. TRẠNG THÁI CÓ DỮ LIỆU
+  // 2. HIỂN THỊ DỮ LIỆU
   return (
-    <div className="flex items-center gap-2 mb-3 group">
-      {/* Avatar có Link */}
-      <Link href={`/profile/${user?.user_id}`} className="relative block">
-        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 transition-transform group-hover:scale-105 group-hover:border-red-500/50">
+    // Xóa mb-3 ở đây để component cha (ThreadCard) tự căn chỉnh sẽ linh hoạt hơn
+    <div className="flex items-center gap-3 group">
+      
+      {/* Avatar Wrapper */}
+      <Link href={`/profile/${user?.user_id}`} className="relative block shrink-0">
+        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md group-hover:border-primary/50">
           <Image
             src={getAvatarUrl(user?.url_avatar)}
             alt="avatar"
@@ -62,17 +63,21 @@ const getAvatarUrl = (url?: string | null) => {
         </div>
       </Link>
 
-      {/* Tên User có Link */}
-      <div className="flex flex-col">
+      {/* Info Wrapper */}
+      <div className="flex flex-col justify-center">
+        {/* Tên chính: Dùng màu xám đậm (900) thay vì 200 để rõ nét */}
         <Link 
             href={`/profile/${user?.user_id}`}
-            className="font-bold text-sm text-gray-200 hover:text-red-500 transition-colors uppercase tracking-wide leading-none"
+            className="font-bold text-[15px] text-gray-900 leading-tight hover:text-primary transition-colors hover:underline decoration-primary/30 underline-offset-2"
         >
-          {user?.firstName || "Unknown"} {user?.lastName || ""}
+          {user?.firstName || "Người dùng"} {user?.lastName || "Ẩn danh"}
         </Link>
         
-        {/* (Tùy chọn) Hiển thị Role nếu là Admin */}
-        {/* {user?.role === 'admin' && <span className="text-[10px] text-red-500 font-bold mt-1">ADMIN</span>} */}
+        {/* Role hoặc Username phụ (nếu có) để tạo chiều sâu */}
+        <span className="text-xs text-gray-500 font-medium mt-0.5 group-hover:text-gray-600 transition-colors">
+            {user?.firstName ? user.firstName.toLowerCase() : "user"} 
+            <ReputationBadge score={user?.reputation_score || 0} size="sm" />
+        </span>
       </div>
     </div>
   );

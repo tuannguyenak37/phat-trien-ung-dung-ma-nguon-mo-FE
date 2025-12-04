@@ -13,7 +13,7 @@ const APIgetThreadById = async (id: string,data:HomeList) => {
 
 
 const APICreate = async (formData: FormData) => {
-  return await axios.post("/threads/create", formData, {
+  return await axios.post("/threads", formData, {
     headers: {
       "Content-Type": "multipart/form-data", // Quan trọng để gửi file
     },

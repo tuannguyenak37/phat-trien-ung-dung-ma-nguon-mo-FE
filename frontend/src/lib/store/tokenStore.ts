@@ -7,6 +7,10 @@ interface User {
   firstName: string;
   lastName: string;
   url_avatar?: string | null;
+  
+  description?: string |null;
+  url_bg?: string | null
+  reputation_score: number
 }
 
 interface AuthState {

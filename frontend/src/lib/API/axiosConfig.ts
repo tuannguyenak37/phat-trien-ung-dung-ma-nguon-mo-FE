@@ -66,6 +66,9 @@ axiosInstance.interceptors.response.use(
             role: data.role,
             firstName: data.firstName,
             lastName: data.lastName,
+            description:data.description,
+            url_bg:  data.url_bg,
+            reputation_score: data.reputation_score
           };
           useAuthStore.getState().setAuth(newAccessToken, userInfo);
 

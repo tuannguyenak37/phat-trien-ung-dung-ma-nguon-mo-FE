@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { 
-  PhotoIcon, XMarkIcon, HashtagIcon, FireIcon 
+  PhotoIcon, XMarkIcon, HashtagIcon, PencilSquareIcon, GlobeAltIcon
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/tokenStore";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner"; // Khuyên dùng Sonner cho đồng bộ trang Auth
 import { categoryService } from "@/lib/API/category";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiThead from "@/lib/API/thead";
-import { motion, AnimatePresence, Variants } from "framer-motion"; // Import Framer Motion
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 // --- TYPES ---
 interface CategoryItem {
@@ -28,69 +28,25 @@ interface ThreadFormInputs {
   media_files: FileList;
 }
 
-// --- MOTION COMPONENT: EMBER PARTICLES ---
-// Đốm lửa bay ngẫu nhiên bằng Framer Motion
-const EmberParticles = () => {
-  // Tạo mảng tĩnh để render, random giá trị trong lúc render
-  const particleCount = 15;
-  
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {[...Array(particleCount)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute bottom-0 w-1 h-1 bg-orange-500 rounded-full blur-[1px]"
-          initial={{ 
-            opacity: 0, 
-            y: 0, 
-            x: `${Math.random() * 100}%` 
-          }}
-          animate={{ 
-            opacity: [0, 0.8, 0], 
-            y: -300 - Math.random() * 200, // Bay lên cao ngẫu nhiên
-            x: `${(Math.random() - 0.5) * 50}%` // Bay xiên ngẫu nhiên
-          }}
-          transition={{
-            duration: 3 + Math.random() * 4,
-            repeat: Infinity,
-            ease: "linear",
-            delay: Math.random() * 2,
-          }}
-          style={{
-            boxShadow: "0 0 8px 2px rgba(255, 69, 0, 0.6)"
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// --- MOTION VARIANTS (Cấu hình chuyển động) ---
+// --- MOTION VARIANTS ---
 const modalVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  hidden: { opacity: 0, scale: 0.95, y: 10 },
   visible: { 
     opacity: 1, 
     scale: 1, 
     y: 0,
-    transition: { type: "spring", damping: 25, stiffness: 300 } // Hiệu ứng nảy nhẹ
+    transition: { type: "spring", damping: 25, stiffness: 350 } 
   },
-  exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2 } }
+  exit: { opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.15 } }
 };
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1, // Các con xuất hiện cách nhau 0.1s
-      delayChildren: 0.2
-    }
+const contentVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { staggerChildren: 0.05 } 
   }
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0 }
 };
 
 export default function CreateThreadForm() {
@@ -118,15 +74,12 @@ export default function CreateThreadForm() {
   const createThreadMutation = useMutation({
     mutationFn: (formData: FormData) => apiThead.APICreate(formData),
     onSuccess: () => {
-      toast.success("Ngọn lửa đã được thắp sáng!", { 
-        icon: '🔥',
-        style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } 
-      });
+      toast.success("Đăng bài thành công!");
       closeModal();
       queryClient.invalidateQueries({ queryKey: ["user-threads"] });
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.detail || "Lỗi khi đăng bài");
+      toast.error(error?.response?.data?.detail || "Có lỗi xảy ra, vui lòng thử lại.");
     },
   });
 
@@ -144,7 +97,10 @@ export default function CreateThreadForm() {
 
   // Submit
   const onSubmit: SubmitHandler<ThreadFormInputs> = (data) => {
-    if (!user) return router.push("/auth/login");
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để đăng bài!");
+      return router.push("/auth/login");
+    }
 
     const tagsArray = data.tags_input
       ? data.tags_input.split(",").map((tag) => tag.trim()).filter((t) => t !== "")
@@ -172,183 +128,180 @@ export default function CreateThreadForm() {
     <>
       {/* 1. TRIGGER BAR (THANH KÍCH HOẠT) */}
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mb-8 relative group"
+        className="mb-6"
       >
-        {/* Glow Effect */}
-        <div className="absolute -inset-0.5 gradient-to-r from-red-600 to-orange-600 rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-500"></div>
-        
         <motion.div 
             onClick={openModal}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            className="relative bg-[#0a0a0a] rounded-2xl p-4 border border-white/10 shadow-sm cursor-pointer flex items-center gap-4 transition-colors hover:border-white/20"
+            whileHover={{ scale: 1.005 }}
+            whileTap={{ scale: 0.99 }}
+            className="group relative bg-white rounded-xl p-3 border border-gray-200 shadow-sm hover:shadow-md cursor-pointer flex items-center gap-3 transition-all duration-200"
         >
             {/* Avatar */}
-            <div className="w-11 h-11 rounded-full bg-[#1a1a1a] border border-white/10 overflow-hidden relative shrink-0">
+            <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-100 overflow-hidden relative shrink-0">
                 {user?.url_avatar ? (
                     <Image src={user.url_avatar} fill alt="ava" className="object-cover"/>
                 ) : (
-                    <div className="w-full h-full bg-[#222]"></div>
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+                        <span className="text-xs font-bold">You</span>
+                    </div>
                 )}
             </div>
 
             {/* Input Fake */}
-            <div className="flex-1 bg-[#151515] h-11 rounded-full flex items-center px-5 border border-white/5 group-hover:bg-[#1a1a1a] transition-colors">
-                <span className="text-gray-500 font-medium text-sm">
-                    Ngọn lửa vẫn đang dẫn lối... (Viết gì đó?)
+            <div className="flex-1 bg-gray-100/50 h-10 rounded-full flex items-center px-4 border border-transparent group-hover:bg-gray-100 group-hover:border-gray-200 transition-all">
+                <span className="text-gray-500 font-medium text-sm truncate">
+                    {user?.firstName ? `${user.firstName} ơi, bạn đang nghĩ gì thế?` : "Bạn đang nghĩ gì thế?"}
                 </span>
             </div>
 
-            {/* Icon */}
-            <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-[#151515] text-gray-400 group-hover:text-orange-500 transition-colors">
-                 <PhotoIcon className="w-5 h-5" />
+            {/* Icons Action */}
+            <div className="hidden sm:flex items-center gap-2 pr-2">
+                 <div className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-primary transition-colors">
+                     <PhotoIcon className="w-5 h-5" />
+                 </div>
             </div>
         </motion.div>
       </motion.div>
 
-      {/* 2. MODAL (POPUP FORM) */}
+      {/* 2. MODAL POPUP */}
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             
-            {/* Backdrop (Fade In) */}
+            {/* Backdrop */}
             <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/80 backdrop-blur-sm" 
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" 
                 onClick={closeModal}
             />
 
-            {/* Main Card (Zoom & Slide Up) */}
+            {/* Main Modal */}
             <motion.div 
                 variants={modalVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(255,69,0,0.15)] relative z-10 flex flex-col max-h-[90vh] overflow-hidden"
+                className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden relative z-10 flex flex-col max-h-[90vh]"
             >
               
-              {/* --- HIỆU ỨNG LỬA CHẠY NỀN --- */}
-              <EmberParticles />
-
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur relative z-20">
-                  <h3 className="text-lg font-bold text-gray-200 flex items-center gap-2">
-                     <FireIcon className="w-5 h-5 text-orange-600 animate-pulse" /> Tạo bài viết
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white sticky top-0 z-20">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                     <PencilSquareIcon className="w-5 h-5 text-primary" /> Tạo bài viết mới
                   </h3>
-                  <button onClick={closeModal} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition">
+                  <button onClick={closeModal} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
                       <XMarkIcon className="w-5 h-5" />
                   </button>
               </div>
 
-              {/* Body (Staggered Animation) */}
-              <div className="overflow-y-auto p-5 custom-scrollbar relative z-20">
-                  <motion.form 
-                    id="create-thread-form" 
-                    onSubmit={handleSubmit(onSubmit)} 
-                    className="space-y-5"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
+              {/* Form Body */}
+              <div className="overflow-y-auto px-6 py-4 custom-scrollbar">
+                  <form id="create-thread-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                       
-                      {/* User & Category */}
-                      <motion.div variants={itemVariants} className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#222] overflow-hidden relative border border-white/10">
+                      {/* User & Category Selector */}
+                      <motion.div variants={contentVariants} className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-full bg-gray-100 overflow-hidden relative border border-gray-100 shadow-sm">
                                {user?.url_avatar && <Image src={user.url_avatar} fill alt="ava" className="object-cover"/>}
                           </div>
-                          <div>
-                              <h4 className="font-semibold text-gray-200 text-sm">{user?.firstName} {user?.lastName}</h4>
-                              <select 
-                                  {...register("category_id", { required: true })}
-                                  className="mt-0.5 bg-transparent text-xs text-orange-500 font-medium border-none outline-none cursor-pointer hover:text-orange-400 transition-colors p-0 uppercase tracking-wide"
-                              >
-                                  <option value="" className="bg-[#1a1a1a] text-gray-400">Chọn chủ đề ▼</option>
-                                  {!isLoading && categories.map((c: CategoryItem) => (
-                                      <option key={c.category_id} value={c.category_id} className="bg-[#1a1a1a] text-gray-300">
-                                          {c.name}
-                                      </option>
-                                  ))}
-                              </select>
+                          <div className="flex flex-col">
+                              <span className="font-bold text-gray-900 text-sm leading-tight">{user?.firstName} {user?.lastName}</span>
+                              
+                              {/* Category Dropdown styled as a badge */}
+                              <div className="relative mt-1 inline-block">
+                                <GlobeAltIcon className="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <select 
+                                    {...register("category_id", { required: true })}
+                                    className="appearance-none bg-gray-100 text-xs font-medium text-gray-600 rounded-md py-1 pl-6 pr-6 border-none focus:ring-1 focus:ring-primary cursor-pointer hover:bg-gray-200 transition-colors"
+                                >
+                                    <option value="">Chọn chủ đề</option>
+                                    {!isLoading && categories.map((c: CategoryItem) => (
+                                        <option key={c.category_id} value={c.category_id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                              </div>
                           </div>
                       </motion.div>
 
-                      {/* Inputs */}
-                      <motion.div variants={itemVariants}>
+                      {/* Title Input */}
+                      <motion.div variants={contentVariants}>
                           <input 
-                              {...register("title", { required: "Nhập tiêu đề" })}
+                              {...register("title", { required: "Vui lòng nhập tiêu đề" })}
                               type="text" 
                               placeholder="Tiêu đề bài viết..." 
-                              className="w-full bg-transparent text-xl font-bold text-white placeholder-gray-600 border-none outline-none focus:ring-0 p-0"
+                              className="w-full bg-transparent text-xl font-bold text-gray-900 placeholder-gray-400 border-none outline-none focus:ring-0 p-0"
                           />
                       </motion.div>
 
-                      <motion.div variants={itemVariants}>
+                      {/* Content Textarea */}
+                      <motion.div variants={contentVariants}>
                           <textarea 
-                              {...register("content", { required: "Nhập nội dung" })}
-                              placeholder="Chia sẻ câu chuyện của bạn..." 
-                              rows={4}
-                              className="w-full bg-transparent text-base text-gray-300 placeholder-gray-600 border-none outline-none focus:ring-0 p-0 resize-none min-h-[100px]"
+                              {...register("content", { required: "Vui lòng nhập nội dung" })}
+                              placeholder="Hãy chia sẻ câu chuyện của bạn..." 
+                              rows={5}
+                              className="w-full bg-transparent text-base text-gray-700 placeholder-gray-400 border-none outline-none focus:ring-0 p-0 resize-none min-h-[120px]"
                           ></textarea>
                       </motion.div>
 
-                      <motion.div variants={itemVariants} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 border border-white/5">
-                          <HashtagIcon className="w-4 h-4 text-orange-500" />
+                      {/* Tags Input */}
+                      <motion.div variants={contentVariants} className="flex items-center gap-2">
+                          <HashtagIcon className="w-4 h-4 text-primary" />
                           <input 
                               {...register("tags_input")}
                               type="text" 
-                              placeholder="Thêm tags (cách nhau dấu phẩy)..." 
-                              className="flex-1 bg-transparent text-sm text-orange-300 placeholder-gray-600 border-none outline-none focus:ring-0 p-0"
+                              placeholder="Thêm thẻ (VD: review, công nghệ)..." 
+                              className="flex-1 bg-transparent text-sm text-primary placeholder-gray-400 border-none outline-none focus:ring-0 p-0"
                           />
                       </motion.div>
 
-                      {/* Media */}
-                      <motion.div variants={itemVariants}>
+                      {/* Image Preview & Upload */}
+                      <motion.div variants={contentVariants} className="pt-2">
                           {previewImages.length > 0 && (
                               <div className="grid grid-cols-2 gap-2 mb-3">
                                   {previewImages.map((src, idx) => (
-                                      <motion.div 
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        key={idx} 
-                                        className="relative aspect-video bg-[#111] rounded-lg overflow-hidden border border-white/10"
-                                      >
+                                      <div key={idx} className="relative aspect-video bg-gray-50 rounded-lg overflow-hidden border border-gray-100 shadow-sm group">
                                           <Image src={src} fill alt="preview" className="object-cover" />
-                                      </motion.div>
+                                      </div>
                                   ))}
                               </div>
                           )}
-                          <motion.div 
-                             whileHover={{ scale: 1.01, borderColor: "rgba(249, 115, 22, 0.4)" }}
-                             whileTap={{ scale: 0.99 }}
-                             className="relative group cursor-pointer border border-dashed border-white/10 rounded-xl p-4 hover:bg-white/5 transition-colors text-center"
-                          >
+                          
+                          <div className="relative group cursor-pointer border border-dashed border-gray-300 rounded-xl p-4 hover:bg-gray-50 hover:border-primary/50 transition-all text-center">
                               <input {...register("media_files")} type="file" multiple accept="image/*,video/*" className="absolute inset-0 opacity-0 cursor-pointer z-10"/>
-                              <div className="flex flex-col items-center gap-1">
-                                  <PhotoIcon className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-colors" />
-                                  <span className="text-xs text-gray-500 font-medium">Thêm ảnh hoặc video</span>
+                              <div className="flex flex-col items-center gap-2">
+                                  <div className="p-2 bg-gray-100 rounded-full group-hover:bg-white group-hover:shadow-sm transition-all">
+                                      <PhotoIcon className="w-6 h-6 text-gray-400 group-hover:text-primary" />
+                                  </div>
+                                  <span className="text-xs text-gray-500 font-medium">Thêm ảnh hoặc video vào bài viết</span>
                               </div>
-                          </motion.div>
+                          </div>
                       </motion.div>
-
-                  </motion.form>
+                  </form>
               </div>
 
               {/* Footer */}
-              <div className="p-4 border-t border-white/10 bg-[#0a0a0a]/80 backdrop-blur relative z-20">
+              <div className="p-4 border-t border-gray-100 bg-white sticky bottom-0 z-20">
                   <motion.button 
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
                       form="create-thread-form"
                       type="submit" 
                       disabled={createThreadMutation.isPending}
-                      className="w-full gradient-to-r from-orange-700 to-red-800 hover:from-orange-600 hover:to-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,69,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-black font-bold py-3 rounded-xl shadow-lg shadow-primary/25 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                      {createThreadMutation.isPending ? "Đang thắp lửa..." : "Đăng Bài"}
+                      {createThreadMutation.isPending ? (
+                        <>
+                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                           <span>Đang đăng...</span>
+                        </>
+                      ) : (
+                        "Đăng bài viết"
+                      )}
                   </motion.button>
               </div>
 

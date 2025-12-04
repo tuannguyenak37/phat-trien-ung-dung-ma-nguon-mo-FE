@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner"; // Sử dụng Sonner cho đồng bộ
 
 // --- IMPORTS ---
 import VoteControl from "./VoteControl"; 
 import UserThead from "./userthead";
-import CommentSection from "./comment/CommentSection"; // Import component Comment tổng
+import CommentSection from "./comment/CommentSection";
 
 import {
   ClockIcon,
@@ -17,14 +18,24 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   EllipsisHorizontalIcon,
+  LinkIcon,
+  FlagIcon
 } from "@heroicons/react/24/outline";
+
+// Icon Facebook/Zalo SVG (Custom components)
+const FacebookIcon = () => (
+  <svg className="w-5 h-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+);
+const ZaloIcon = () => (
+  <span className="w-5 h-5 font-bold text-blue-600 flex items-center justify-center bg-blue-50 rounded text-[10px]">Zalo</span>
+);
 
 import type { Thread, Media } from "@/types/home";
 
 const API_DOMAIN = process.env.NEXT_PUBLIC_URL_BACKEND_IMG || "http://localhost:8000";
 
 // =================================================================
-// 1. HÀM HELPER: FORMAT THỜI GIAN
+// 1. HELPER: FORMAT TIME
 // =================================================================
 const formatRelativeTime = (dateString: string) => {
   const date = new Date(dateString);
@@ -39,23 +50,14 @@ const formatRelativeTime = (dateString: string) => {
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays <= 7) return `${diffInDays} ngày trước`;
   
-  return date.toLocaleDateString("vi-VN", {
-    day: "2-digit", month: "2-digit", year: "numeric",
-  });
+  return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 };
 
 // =================================================================
-// 2. SUB-COMPONENT: LIGHTBOX (MODAL XEM ẢNH FULL)
+// 2. SUB-COMPONENT: LIGHTBOX (Gallery)
 // =================================================================
-const ImageGalleryModal = ({
-  images,
-  initialIndex,
-  onClose,
-}: {
-  images: Media[];
-  initialIndex: number;
-  onClose: () => void;
-}) => {
+// Giữ giao diện tối cho Lightbox để tập trung vào ảnh
+const ImageGalleryModal = ({ images, initialIndex, onClose }: { images: Media[]; initialIndex: number; onClose: () => void }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   
   const getImageUrl = (url: string) => {
@@ -65,13 +67,8 @@ const ImageGalleryModal = ({
     return `${baseUrl}${path}`;
   };
 
-  const nextImage = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  }, [images.length]);
-
-  const prevImage = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  }, [images.length]);
+  const nextImage = useCallback(() => setCurrentIndex((prev) => (prev + 1) % images.length), [images.length]);
+  const prevImage = useCallback(() => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length), [images.length]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -85,52 +82,25 @@ const ImageGalleryModal = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md"
       onClick={onClose}
     >
-      <button
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute top-6 right-6 z-[10000] p-3 bg-zinc-800/50 hover:bg-red-600 rounded-full text-white border border-white/20 transition-all shadow-lg hover:scale-110 group"
-      >
-        <XMarkIcon className="w-8 h-8 sm:w-10 sm:h-10 font-bold stroke-2" />
+      <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="absolute top-6 right-6 z-[10000] p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all">
+        <XMarkIcon className="w-8 h-8" />
       </button>
 
       <div className="relative w-full h-full flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
         {images.length > 1 && (
-          <button onClick={prevImage} className="absolute left-4 z-50 p-4 bg-zinc-800/50 rounded-full hover:bg-white/20 text-white border border-white/10 transition-transform hover:scale-110">
-            <ChevronLeftIcon className="w-8 h-8" />
-          </button>
+          <button onClick={prevImage} className="absolute left-4 z-50 p-3 bg-white/10 rounded-full hover:bg-white/20 text-white transition-all"><ChevronLeftIcon className="w-6 h-6" /></button>
         )}
-
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="relative flex items-center justify-center w-full h-full"
-        >
+        <motion.div key={currentIndex} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative flex items-center justify-center w-full h-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={getImageUrl(images[currentIndex].file_url)}
-            alt="Full preview"
-            className="max-w-[95vw] max-h-[85vh] object-contain shadow-2xl rounded-md"
-          />
+          <img src={getImageUrl(images[currentIndex].file_url)} alt="Full preview" className="max-w-[95vw] max-h-[85vh] object-contain shadow-2xl rounded-lg" />
         </motion.div>
-
         {images.length > 1 && (
-          <button onClick={nextImage} className="absolute right-4 z-50 p-4 bg-zinc-800/50 rounded-full hover:bg-white/20 text-white border border-white/10 transition-transform hover:scale-110">
-            <ChevronRightIcon className="w-8 h-8" />
-          </button>
+          <button onClick={nextImage} className="absolute right-4 z-50 p-3 bg-white/10 rounded-full hover:bg-white/20 text-white transition-all"><ChevronRightIcon className="w-6 h-6" /></button>
         )}
-      </div>
-      
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none">
-          <span className="px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-white font-mono text-sm border border-white/10">
-            {currentIndex + 1} / {images.length}
-          </span>
       </div>
     </motion.div>
   );
@@ -142,9 +112,20 @@ const ImageGalleryModal = ({
 export default function ThreadCard({ thread }: { thread: Thread }) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
-  
-  // 👇 STATE QUẢN LÝ MỞ/ĐÓNG COMMENT
   const [showComments, setShowComments] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  
+  // Ref để click outside đóng menu share
+  const shareMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
+        setShowShareMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const getImageUrl = (url: string) => {
     if (url.startsWith("http")) return url;
@@ -156,9 +137,43 @@ export default function ThreadCard({ thread }: { thread: Thread }) {
   const mediaList = thread.media || [];
   const count = mediaList.length;
 
-  const openGallery = (index: number) => {
-    setGalleryIndex(index);
-    setGalleryOpen(true);
+  // --- SHARE FUNCTIONALITY ---
+  const getCurrentUrl = () => {
+    // Nếu có trang chi tiết thread, hãy thay thế logic này
+    // Ví dụ: return `${window.location.origin}/thread/${thread.thread_id}`;
+    return typeof window !== 'undefined' ? window.location.href : ''; 
+  };
+
+  const handleShareFacebook = () => {
+    const url = getCurrentUrl();
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+    setShowShareMenu(false);
+  };
+
+  const handleCopyLink = () => {
+    const url = getCurrentUrl();
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("Đã sao chép liên kết!");
+    }).catch(() => toast.error("Không thể sao chép"));
+    setShowShareMenu(false);
+  };
+  
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: thread.title || 'Bài viết hay',
+          text: thread.content?.substring(0, 100) + '...',
+          url: getCurrentUrl(),
+        });
+        setShowShareMenu(false);
+      } catch (err) {
+        console.log('User cancelled share');
+      }
+    } else {
+      // Fallback nếu không hỗ trợ native share thì mở menu copy
+      setShowShareMenu(!showShareMenu);
+    }
   };
 
   const getGridClass = () => {
@@ -171,34 +186,35 @@ export default function ThreadCard({ thread }: { thread: Thread }) {
 
   return (
     <>
-      <div className="group mb-6 rounded-2xl border border-zinc-800 bg-[#0a0a0a] p-5 transition-all hover:border-zinc-700 hover:shadow-lg">
+      {/* CARD CONTAINER: Light Theme */}
+      <div className="group mb-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
         
-        {/* --- HEADER: USER INFO --- */}
+        {/* --- HEADER --- */}
         <div className="mb-3 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <UserThead id={thread.user_id} />
-            <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-medium mt-1">
-              <span className="w-1 h-1 rounded-full bg-zinc-600"></span>
-              <ClockIcon className="w-3 h-3" />
-              {thread.created_at ? formatRelativeTime(thread.created_at) : ""}
+            {/* User Component cần trả về text màu tối */}
+            <UserThead id={thread.user_id} /> 
+            <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium mt-0.5">
+              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span>{thread.created_at ? formatRelativeTime(thread.created_at) : ""}</span>
             </div>
           </div>
-          <button className="text-zinc-500 hover:text-white p-1 rounded-full hover:bg-zinc-800 transition-colors">
+          <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors">
             <EllipsisHorizontalIcon className="w-6 h-6" />
           </button>
         </div>
 
         {/* --- CONTENT --- */}
-        <div className="mb-4">
-          {thread.title && <h3 className="text-lg font-bold text-gray-100 mb-2 leading-tight">{thread.title}</h3>}
-          {thread.content && <p className="text-sm text-zinc-300 whitespace-pre-line leading-relaxed">{thread.content}</p>}
+        <div className="mb-3">
+          {thread.title && <h3 className="text-lg font-bold text-gray-900 mb-1.5 leading-snug">{thread.title}</h3>}
+          {thread.content && <p className="text-[15px] text-gray-700 whitespace-pre-line leading-relaxed">{thread.content}</p>}
         </div>
 
         {/* --- TAGS --- */}
         {thread.tags && thread.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-3">
             {thread.tags.map((tag, idx) => (
-                <span key={idx} className="text-[10px] font-bold uppercase tracking-widest text-orange-400 bg-orange-950/20 px-2 py-1 rounded border border-orange-900/30 hover:border-orange-500/50 hover:text-orange-300 cursor-pointer transition-colors">
+                <span key={idx} className="text-[11px] font-semibold text-primary bg-primary/5 px-2.5 py-1 rounded-md border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors">
                   #{typeof tag === "string" ? tag : tag.name}
                 </span>
             ))}
@@ -207,16 +223,16 @@ export default function ThreadCard({ thread }: { thread: Thread }) {
 
         {/* --- MEDIA GRID --- */}
         {count > 0 && (
-          <div className={`mb-4 grid gap-0.5 overflow-hidden rounded-xl border border-zinc-800 ${getGridClass()}`}>
+          <div className={`mb-4 grid gap-1 overflow-hidden rounded-xl ${getGridClass()}`}>
             {mediaList.slice(0, 4).map((media, index) => {
               const isThreeLayoutFirstItem = count === 3 && index === 0;
               const remaining = count - 4;
               return (
-                <div key={media.media_id || index} onClick={() => openGallery(index)} className={`relative bg-[#151515] cursor-pointer group/img overflow-hidden h-full w-full ${isThreeLayoutFirstItem ? "row-span-2" : ""}`}>
+                <div key={media.media_id || index} onClick={() => { setGalleryIndex(index); setGalleryOpen(true); }} className={`relative bg-gray-100 cursor-pointer group/img overflow-hidden h-full w-full ${isThreeLayoutFirstItem ? "row-span-2" : ""}`}>
                   <Image src={getImageUrl(media.file_url)} alt="media" fill className="object-cover transition-transform duration-700 group-hover/img:scale-105" sizes="(max-width: 768px) 100vw, 50vw" />
                   {index === 3 && remaining > 0 && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 hover:bg-black/70 transition-colors backdrop-blur-[1px]">
-                      <span className="text-2xl font-bold text-white drop-shadow-lg">+{remaining}</span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 hover:bg-black/60 transition-colors backdrop-blur-[1px]">
+                      <span className="text-2xl font-bold text-white drop-shadow-md">+{remaining}</span>
                     </div>
                   )}
                 </div>
@@ -226,49 +242,88 @@ export default function ThreadCard({ thread }: { thread: Thread }) {
         )}
 
         {/* --- FOOTER ACTIONS --- */}
-        <div className="flex items-center justify-between border-t border-zinc-800 pt-3 mt-2">
-          <div className="flex gap-4 items-center">
+        <div className="flex items-center justify-between pt-3 mt-1 border-t border-gray-100">
+          <div className="flex gap-1 items-center">
             
-            {/* 1. VOTE CONTROL */}
-            <VoteControl
-              threadId={thread.thread_id}
-              initialUpvotes={thread.upvote_count || 0}
-              initialDownvotes={thread.downvote_count || 0}
-              initialUserVote={thread.vote_stats?.is_voted || 0}
-              isHorizontal={true}
-            />
+            {/* 1. VOTE CONTROL (Cần style lại component này cho hợp nền sáng) */}
+            <div className="mr-3">
+                <VoteControl
+                  threadId={thread.thread_id}
+                  initialUpvotes={thread.upvote_count || 0}
+                  initialDownvotes={thread.downvote_count || 0}
+                  initialUserVote={thread.vote_stats?.is_voted || 0}
+                  isHorizontal={true}
+                />
+            </div>
 
-            {/* 2. COMMENT TOGGLE BUTTON */}
+            {/* 2. COMMENT BUTTON */}
             <button 
                 onClick={() => setShowComments(!showComments)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all group/cmt ${
-                    showComments ? "text-blue-400 bg-blue-500/10" : "text-zinc-500 hover:text-blue-400 hover:bg-blue-500/10"
+                    showComments ? "text-primary bg-primary/5 font-medium" : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                 }`}
             >
-              <ChatBubbleLeftIcon className="w-5 h-5 group-hover/cmt:-translate-y-0.5 transition-transform" />
-              <span className="text-xs font-medium">
-                {thread.comment_count > 0 ? `${thread.comment_count} Bình luận` : "Bình luận"}
+              <ChatBubbleLeftIcon className="w-5 h-5 group-hover/cmt:scale-110 transition-transform" />
+              <span className="text-xs">
+                {thread.comment_count > 0 ? `${thread.comment_count} Thảo luận` : "Thảo luận"}
               </span>
             </button>
           </div>
 
-          <button className="p-2 text-zinc-600 hover:text-white transition-colors rounded-full hover:bg-white/5">
-            <ShareIcon className="w-5 h-5" />
-          </button>
+          {/* 3. SHARE BUTTON & MENU */}
+          <div className="relative" ref={shareMenuRef}>
+              <button 
+                onClick={handleNativeShare} // Ưu tiên native share trên mobile
+                // Trên PC hover hoặc click để mở menu custom
+                onMouseEnter={() => window.innerWidth > 768 && setShowShareMenu(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+              >
+                <ShareIcon className="w-5 h-5" />
+                <span className="text-xs hidden sm:inline">Chia sẻ</span>
+              </button>
+
+              <AnimatePresence>
+                {showShareMenu && (
+                   <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 p-1.5 z-20 origin-bottom-right"
+                      onMouseLeave={() => setShowShareMenu(false)}
+                   >
+                      <button onClick={handleShareFacebook} className="flex w-full items-center gap-3 px-3 py-2.5 hover:bg-blue-50 text-gray-700 rounded-lg text-sm transition-colors text-left">
+                          <FacebookIcon /> Facebook
+                      </button>
+                      
+                      <button onClick={handleCopyLink} className="flex w-full items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-gray-700 rounded-lg text-sm transition-colors text-left">
+                          <ZaloIcon /> Zalo / Copy
+                      </button>
+
+                      <button onClick={handleCopyLink} className="flex w-full items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-gray-700 rounded-lg text-sm transition-colors text-left">
+                          <LinkIcon className="w-5 h-5 text-gray-500" /> Sao chép link
+                      </button>
+                      
+                      <div className="my-1 border-t border-gray-100"></div>
+                      
+                      <button className="flex w-full items-center gap-3 px-3 py-2 hover:bg-red-50 text-red-600 rounded-lg text-xs transition-colors text-left">
+                          <FlagIcon className="w-4 h-4" /> Báo cáo
+                      </button>
+                   </motion.div>
+                )}
+              </AnimatePresence>
+          </div>
         </div>
 
-        {/* --- COMMENT SECTION (Lazy Load & Animation) --- */}
+        {/* --- COMMENT SECTION --- */}
         <AnimatePresence>
             {showComments && (
                 <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden"
                 >
-                    <div className="mt-4 pt-4 border-t border-zinc-800/50">
-                        {/* Component này sẽ tự gọi API getComments khi được render */}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
                         <CommentSection 
                             threadId={thread.thread_id} 
                             commentCount={thread.comment_count}

@@ -6,7 +6,7 @@ import CommentInput from "./CommentInput";
 
 interface CommentSectionProps {
   threadId: string;
-  commentCount: number; // Lấy từ thread detail để hiện tổng số
+  commentCount: number;
 }
 
 export default function CommentSection({ threadId, commentCount }: CommentSectionProps) {
@@ -17,10 +17,19 @@ export default function CommentSection({ threadId, commentCount }: CommentSectio
   });
 
   return (
-    <div className="mt-8 pt-6 border-t border-zinc-800">
-      <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-        Bình luận <span className="bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded text-xs">{commentCount}</span>
-      </h3>
+    <div className="mt-2 pt-2">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+          <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            Bình luận <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-xs font-extrabold">{commentCount}</span>
+          </h3>
+          
+          {/* Dropdown sắp xếp (Ví dụ - có thể phát triển sau) */}
+          <select className="text-xs font-medium text-gray-500 bg-transparent border-none outline-none cursor-pointer hover:text-gray-800">
+             <option value="newest">Mới nhất</option>
+             <option value="top">Phổ biến nhất</option>
+          </select>
+      </div>
 
       {/* Form nhập comment chính */}
       <div className="mb-8">
@@ -30,17 +39,34 @@ export default function CommentSection({ threadId, commentCount }: CommentSectio
       {/* Danh sách Comment */}
       <div className="space-y-6">
         {isLoading ? (
-           <div className="text-center text-zinc-500 py-10">Đang tải bình luận...</div>
+           // Skeleton Loading cho danh sách
+           <div className="space-y-4 animate-pulse">
+              {[1, 2, 3].map(i => (
+                  <div key={i} className="flex gap-3">
+                      <div className="w-9 h-9 bg-gray-200 rounded-full shrink-0"></div>
+                      <div className="flex-1 space-y-2">
+                          <div className="h-10 bg-gray-200 rounded-2xl w-3/4"></div>
+                          <div className="h-3 bg-gray-100 rounded w-1/4"></div>
+                      </div>
+                  </div>
+              ))}
+           </div>
         ) : (
-           data?.data.map((comment) => (
-             <CommentItem key={comment.comment_id} comment={comment} threadId={threadId} />
-           ))
+           data?.data.length === 0 ? (
+               <div className="text-center py-8 text-gray-400 text-sm">
+                   Chưa có bình luận nào. Hãy là người đầu tiên!
+               </div>
+           ) : (
+               data?.data.map((comment) => (
+                 <CommentItem key={comment.comment_id} comment={comment} threadId={threadId} />
+               ))
+           )
         )}
         
-        {/* Nút Load more (Nếu cần) */}
-        {(data?.total || 0) > 10 && (
-            <button className="w-full py-3 text-sm text-zinc-500 hover:text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-colors">
-                Xem thêm bình luận
+        {/* Nút Load more */}
+        {(data?.total || 0) > (data?.data.length || 0) && (
+            <button className="w-full py-2.5 mt-4 text-sm font-semibold text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors border border-dashed border-gray-200 hover:border-primary/20">
+                Xem thêm bình luận cũ hơn
             </button>
         )}
       </div>

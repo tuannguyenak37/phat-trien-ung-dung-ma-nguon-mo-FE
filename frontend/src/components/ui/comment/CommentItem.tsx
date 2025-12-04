@@ -1,58 +1,37 @@
 "use client";
 
 import { useState } from "react";
-
-
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-
-
 import { commentApi } from "@/lib/API/comment";
-
-
-
 import { Comment } from "@/types/comment";
-
-
-
 import { formatRelativeTime } from "@/utils/formatdate";
-
-
-
-import UserThead from "../userthead";
-
-
-
 import VoteControl from "../VoteControl";
-
-
-
 import CommentInput from "./CommentInput";
-
-
-
-import { useAuthStore } from "@/lib/store/tokenStore"; // Lấy user hiện tại để check quyền
-
-
-
+import { useAuthStore } from "@/lib/store/tokenStore";
 import { EllipsisHorizontalIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import ConfirmModal from "@/utils/ConfirmModal";
+import { toast } from "sonner";
+import Image from "next/image";
+import Link from "next/link";
+import clsx from "clsx";
 
-
-import ConfirmModal from "@/utils/ConfirmModal"; // Import Modal
-import toast from "react-hot-toast";
-
+// --- HELPERS ---
+const API_DOMAIN = process.env.NEXT_PUBLIC_URL_BACKEND_IMG || "http://localhost:8000";
+const getAvatarUrl = (url?: string | null) => {
+    if (!url) return "/avatar-mac-dinh.jpg"; // Đường dẫn ảnh mặc định
+    if (url.startsWith("http")) return url;
+    return `${API_DOMAIN}/${url.replace(/^\//, "")}`;
+};
 
 interface CommentItemProps {
   comment: Comment;
   threadId: string;
+  isReply?: boolean; // Để xác định kích thước avatar
 }
 
-export default function CommentItem({ comment, threadId }: CommentItemProps) {
+export default function CommentItem({ comment, threadId, isReply = false }: CommentItemProps) {
   const [isReplying, setIsReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
-  
-  // State Edit/Delete
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [showMenu, setShowMenu] = useState(false);
@@ -75,16 +54,15 @@ export default function CommentItem({ comment, threadId }: CommentItemProps) {
     onSuccess: () => {
       setIsEditing(false);
       setShowMenu(false);
-      toast.success("Đã cập nhật bình luận!");
+      toast.success("Đã cập nhật!");
       queryClient.invalidateQueries({ queryKey: ["comments"] });
     },
-    onError: () => toast.error("Lỗi khi cập nhật!"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => commentApi.deleteComment(comment.comment_id),
     onSuccess: () => {
-      toast.success("Đã xóa bình luận!");
+      toast.success("Đã xóa!");
       setIsDeleteModalOpen(false);
       if (comment.parent_comment_id) {
         queryClient.invalidateQueries({ queryKey: ["comments", "reply", comment.parent_comment_id] });
@@ -92,156 +70,159 @@ export default function CommentItem({ comment, threadId }: CommentItemProps) {
         queryClient.invalidateQueries({ queryKey: ["comments", "root", threadId] });
       }
     },
-    onError: () => {
-        toast.error("Lỗi khi xóa!");
-        setIsDeleteModalOpen(false);
-    }
   });
 
   return (
-    <div className="flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300 group/item">
-      {/* Avatar */}
-      <div className="shrink-0 pt-1">
-         <div className="scale-90 origin-top-left">
-            <UserThead id={comment.user_id} />
-         </div>
+    <div className="flex gap-2 group/item w-full">
+      {/* 1. AVATAR */}
+      <div className="shrink-0">
+        <Link href={`/profile/${comment.user_id}`}>
+             <div className={clsx(
+                 "relative rounded-full overflow-hidden border border-gray-200 shadow-sm hover:brightness-95 transition-all",
+                 isReply ? "w-6 h-6" : "w-8 h-8" // Reply thì avatar nhỏ hơn chút giống FB
+             )}>
+                <Image 
+                    src={getAvatarUrl(comment.url_avatar)} 
+                    alt="avatar" 
+                    fill 
+                    className="object-cover"
+                />
+             </div>
+        </Link>
       </div>
 
+      {/* 2. CONTENT & ACTIONS */}
       <div className="flex-1 min-w-0">
-        <div className="group relative">
-            
-            {isEditing ? (
-                <div className="w-full">
-                    <textarea
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-red-500 min-h-[80px]"
-                        autoFocus
-                    />
-                    <div className="flex gap-2 mt-2 justify-end">
-                        <button onClick={() => { setIsEditing(false); setEditContent(comment.content); }} className="text-xs text-zinc-400 hover:text-white px-3 py-1.5">Hủy</button>
-                        <button onClick={() => editMutation.mutate()} disabled={editMutation.isPending || !editContent.trim()} className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-500 disabled:opacity-50">
-                            {editMutation.isPending ? "Đang lưu..." : "Lưu"}
-                        </button>
+        
+        {/* --- KHỐI BUBBLE & EDIT --- */}
+        <div className="flex items-center gap-2">
+            <div className="max-w-full">
+                {isEditing ? (
+                    <div className="w-full min-w-[300px]">
+                        <textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            className="w-full bg-gray-50 border border-gray-300 rounded-2xl p-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+                            rows={2}
+                            autoFocus
+                        />
+                        <div className="flex gap-2 mt-1 text-xs">
+                             <button onClick={() => setIsEditing(false)} className="text-blue-500 hover:underline">Hủy</button>
+                             <button onClick={() => editMutation.mutate()} className="text-blue-500 hover:underline font-bold" disabled={editMutation.isPending}>Lưu</button>
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <div className="bg-zinc-800/40 px-3 py-2 rounded-2xl rounded-tl-none border border-white/5 inline-block pr-4 relative">
-                    <p className="text-sm text-gray-200 whitespace-pre-wrap break-words mt-1">
-                        {comment.content}
-                    </p>
-                </div>
-            )}
+                ) : (
+                    // ✨ STYLE FACEBOOK: Bubble chứa cả Tên và Nội dung
+                    <div className="bg-[#f0f2f5] px-3 py-2 rounded-2xl inline-block relative group/bubble">
+                        <Link href={`/profile/${comment.user_id}`} className="font-bold text-[13px] text-gray-900 hover:underline block leading-tight">
+                            {comment.firstName} {comment.lastName}
+                        </Link>
+                        <p className="text-[15px] text-gray-900 leading-normal whitespace-pre-wrap break-words">
+                            {comment.content}
+                        </p>
+                        
+                        {/* Menu 3 chấm (Chỉ hiện khi hover vào bubble hoặc trên mobile) */}
+                        {(canEdit || canDelete) && (
+                            <button 
+                                onClick={() => setShowMenu(!showMenu)}
+                                className="absolute -right-8 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-gray-500 hover:bg-gray-100 opacity-0 group-hover/bubble:opacity-100 transition-opacity"
+                            >
+                                <EllipsisHorizontalIcon className="w-5 h-5" />
+                            </button>
+                        )}
+                        
+                        {/* Dropdown Menu */}
+                        {showMenu && (
+                             <div className="absolute left-full top-0 ml-2 w-32 bg-white shadow-xl border border-gray-100 rounded-lg z-50 py-1">
+                                {canEdit && (
+                                    <button onClick={() => { setIsEditing(true); setShowMenu(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex gap-2"><PencilIcon className="w-4 h-4"/> Sửa</button>
+                                )}
+                                {canDelete && (
+                                    <button onClick={() => setIsDeleteModalOpen(true)} className="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 flex gap-2"><TrashIcon className="w-4 h-4"/> Xóa</button>
+                                )}
+                             </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
 
-        {/* --- ACTION BAR (SỬA LẠI VỊ TRÍ NÚT 3 CHẤM) --- */}
+        {/* --- ACTION BAR (Dưới Bubble) --- */}
         {!isEditing && (
-            <div className="flex items-center gap-4 mt-1 ml-1 relative min-h-[24px]">
-                {/* 1. Thời gian */}
-                <span className="text-[11px] text-zinc-500 font-medium">
+            <div className="flex items-center gap-3 mt-0.5 ml-1 text-[12px] font-semibold text-gray-500">
+                {/* Thời gian */}
+                <span className="font-normal hover:underline cursor-pointer">
                     {formatRelativeTime(comment.created_at)}
-                    {comment.updated_at && comment.updated_at !== comment.created_at && (
-                        <span className="ml-1 italic text-zinc-600"></span>
-                    )}
                 </span>
-
-                {/* 2. Nút Trả lời */}
-                <button 
-                    onClick={() => setIsReplying(!isReplying)}
-                    className="text-[11px] font-bold text-zinc-400 hover:text-white transition-colors"
-                >
-                    Trả lời
-                </button>
-
-                {/* 3. Vote Control */}
-                <div className="scale-75 origin-left flex items-center">
-                    <VoteControl 
+                
+                {/* Like/Vote */}
+                <div className="scale-90 origin-left">
+                     <VoteControl 
                         commentId={comment.comment_id}
                         initialUpvotes={comment.upvote_count}
                         initialDownvotes={comment.downvote_count}
                         initialUserVote={comment.vote_stats?.is_voted || 0}
                         isHorizontal={true}
+                        hideCountIfZero={true} // Tùy chọn ẩn số 0 cho gọn
                     />
                 </div>
 
-                {/* 4. MENU 3 CHẤM (ĐẶT NGAY ĐÂY, KHÔNG DÙNG ml-auto) */}
-                {(canEdit || canDelete) && (
-                    <div className="relative"> 
-                        <button 
-                            onClick={() => setShowMenu(!showMenu)}
-                            // 👇 Bỏ opacity-0, thay bằng text tối màu để dễ thấy trên mobile
-                            className="p-1 rounded-full text-zinc-600 hover:text-white hover:bg-zinc-800 transition-colors"
-                            title="Tùy chọn"
-                        >
-                            <EllipsisHorizontalIcon className="w-5 h-5" />
-                        </button>
+                {/* Nút Reply */}
+                <button 
+                    onClick={() => setIsReplying(!isReplying)}
+                    className="hover:underline text-gray-600"
+                >
+                    Trả lời
+                </button>
+            </div>
+        )}
 
-                        {/* Dropdown Menu */}
-                        {showMenu && (
-                            <div className="absolute left-0 top-full mt-1 w-32 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
-                                {canEdit && (
-                                    <button 
-                                        onClick={() => { setIsEditing(true); setShowMenu(false); }}
-                                        className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
-                                    >
-                                        <PencilIcon className="w-3.5 h-3.5" /> Sửa
-                                    </button>
-                                )}
-                                {canDelete && (
-                                    <button 
-                                        onClick={() => { setShowMenu(false); setIsDeleteModalOpen(true); }}
-                                        className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2"
-                                    >
-                                        <TrashIcon className="w-3.5 h-3.5" /> Xóa
-                                    </button>
-                                )}
-                            </div>
-                        )}
+        {/* --- FORM TRẢ LỜI --- */}
+        {isReplying && (
+            <div className="mt-2 flex gap-2">
+                <div className="w-6 h-6 rounded-full bg-gray-200 shrink-0 border overflow-hidden">
+                     {/* Avatar người đang đăng nhập (nhỏ) */}
+                     {currentUser?.url_avatar && <Image src={currentUser.url_avatar} width={24} height={24} alt="me" />}
+                </div>
+                <div className="flex-1">
+                    <CommentInput 
+                        threadId={threadId} 
+                        parentCommentId={comment.comment_id}
+                        autoFocus={true}
+                        onSuccess={() => { setIsReplying(false); setShowReplies(true); }} 
+                    />
+                </div>
+            </div>
+        )}
+
+        {/* --- VIEW REPLIES --- */}
+        {(comment.reply_count > 0 || (repliesData?.data?.length || 0) > 0) && (
+            <div className="mt-1">
+                {!showReplies ? (
+                    <button 
+                        onClick={() => setShowReplies(true)}
+                        className="text-[13px] font-bold text-gray-500 hover:underline flex items-center gap-2 ml-1"
+                    >
+                        <div className="w-5 h-[1px] bg-gray-300"></div> {/* Đường kẻ ngang giống FB */}
+                        Xem {comment.reply_count} câu trả lời
+                    </button>
+                ) : (
+                    <div className="space-y-3 pt-2">
+                        {isLoading && <div className="text-xs text-gray-400 pl-2">Đang tải...</div>}
+                        {repliesData?.data.map((reply) => (
+                            // Gọi đệ quy, set isReply=true để avatar nhỏ đi
+                            <CommentItem key={reply.comment_id} comment={reply} threadId={threadId} isReply={true} />
+                        ))}
                     </div>
                 )}
             </div>
         )}
-
-        {/* Form nhập Reply */}
-        {isReplying && (
-            <div className="mt-3 pl-2 border-l-2 border-zinc-700 animate-in slide-in-from-top-2">
-                <CommentInput 
-                    threadId={threadId} 
-                    parentCommentId={comment.comment_id}
-                    autoFocus={true}
-                    onSuccess={() => { setIsReplying(false); setShowReplies(true); }} 
-                />
-            </div>
-        )}
-
-        {/* Nút Xem/Ẩn Reply */}
-        {(comment.reply_count > 0 || (repliesData?.data?.length || 0) > 0) && (
-            <button 
-                onClick={() => setShowReplies(!showReplies)}
-                className="mt-2 text-xs font-semibold text-zinc-500 hover:text-white flex items-center gap-2 group"
-            >
-                <div className="w-8 h-[1px] bg-zinc-700 group-hover:bg-zinc-500 transition-colors"></div>
-                {showReplies ? "Ẩn phản hồi" : `Xem ${comment.reply_count} câu trả lời`}
-            </button>
-        )}
-
-        {/* Danh sách Reply */}
-        {showReplies && (
-            <div className="mt-3 pl-4 border-l border-zinc-800/50 space-y-4">
-                {isLoading && <div className="text-xs text-zinc-500 pl-2 animate-pulse">Đang tải phản hồi...</div>}
-                {repliesData?.data.map((reply) => (
-                    <CommentItem key={reply.comment_id} comment={reply} threadId={threadId} />
-                ))}
-            </div>
-        )}
       </div>
-      
-      {showMenu && <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)}></div>}
 
       <ConfirmModal 
         isOpen={isDeleteModalOpen}
         title="Xóa bình luận?"
-        message="Hành động này không thể hoàn tác."
+        message="Bạn có chắc chắn muốn xóa bình luận này?"
         isDanger={true}
         onCancel={() => setIsDeleteModalOpen(false)}
         onConfirm={() => deleteMutation.mutate()}
