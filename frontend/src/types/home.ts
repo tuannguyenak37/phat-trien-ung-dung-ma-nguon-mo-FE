@@ -58,5 +58,5 @@ export interface UserTheadResponse {
   url_avatar: string | null;
   description: string | null;
   reputation_score: number;
-  url_bg : string | null;
+  url_background : string | null;
 }
