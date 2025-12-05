@@ -14,6 +14,12 @@ export interface Tag {
   tag_id: string;
   name: string;
 }
+export interface User {
+  user_id: string;
+  firstName: string;
+  lastName: string;
+  url_avatar: string;
+}
 
 export interface Thread {
   thread_id: string;
@@ -28,6 +34,7 @@ comment_count: number;
   upvote_count: number;
   downvote_count: number;
   vote_stats?: VoteStats;
+  user: User;
 }
 export interface ThreadListResponse {
   total: number;

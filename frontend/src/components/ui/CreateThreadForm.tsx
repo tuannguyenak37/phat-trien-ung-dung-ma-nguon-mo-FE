@@ -13,7 +13,8 @@ import { categoryService } from "@/lib/API/category";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiThead from "@/lib/API/thead";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-
+import url_bg from "@/utils/url_img"
+import avatar from "@/../public/avatar-mac-dinh.jpg"
 // --- TYPES ---
 interface CategoryItem {
   category_id: string;
@@ -141,7 +142,7 @@ export default function CreateThreadForm() {
             {/* Avatar */}
             <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-100 overflow-hidden relative shrink-0">
                 {user?.url_avatar ? (
-                    <Image src={user.url_avatar} fill alt="ava" className="object-cover"/>
+                    <Image src={url_bg(user?.url_avatar) ||avatar} fill alt="ava" className="object-cover"/>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
                         <span className="text-xs font-bold">You</span>

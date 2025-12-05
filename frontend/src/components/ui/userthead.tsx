@@ -14,6 +14,7 @@ interface UserTheadProps {
 }
 
 export default function UserThead({ id }: UserTheadProps) {
+  console.log("id",id)
   const { data: response, isLoading } = useQuery({
     queryKey: ["user-profile", id],
     queryFn: () => UserAPI.APIpublic_proflle(id),
