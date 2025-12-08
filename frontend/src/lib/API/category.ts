@@ -1,5 +1,15 @@
 import axiosInstance from "@/lib/API/axiosConfig"; // Import cái axios xịn xò đã config
-import {categoriesPopularList,tagPopularList} from "@/types/categories"
+import {categoriesPopularList,tagPopularList,} from "@/types/categories"
+import { 
+  
+  CategoryStatsSummary,
+  CategoryGrowthResponse,
+  CategoryDistributionResponse,
+  
+  GrowthParams,
+  DistributionParams
+} from "@/types/categories";
+
 // 1. Type cho Category trả về
 interface Category {
   category_id: string;
@@ -58,6 +68,31 @@ export const categoryService = {
 categoriesPopular : async ()=>{
   const res = await axiosInstance.get<categoriesPopularList>("/public/categories/popular")
   return res.data
-}
+},
+// --- 1. LẤY THỐNG KÊ TỔNG QUAN (Cho Card Info) ---
+  getStats: async (categoryId: string): Promise<CategoryStatsSummary> => {
+    const { data } = await axiosInstance.get<CategoryStatsSummary>(
+      `router_dashboard/admin/category/${categoryId}`
+    );
+    return data;
+  },
+
+  // --- 2. LẤY DỮ LIỆU TĂNG TRƯỞNG (Cho Line Chart) ---
+  getGrowth: async (categoryId: string, params?: GrowthParams): Promise<CategoryGrowthResponse> => {
+    const { data } = await axiosInstance.get<CategoryGrowthResponse>(
+      `/router_dashboard/admin/category/${categoryId}/growth`,
+      { params }
+    );
+    return data;
+  },
+
+getDistribution: async (params?: DistributionParams): Promise<CategoryDistributionResponse> => {
+    const { data } = await axiosInstance.get<CategoryDistributionResponse>(
+      `/router_dashboard/admin/category/distribution/tuan`,
+      { params }
+    );
+    return data;
+    
+  },
 
 };

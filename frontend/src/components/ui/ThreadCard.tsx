@@ -337,7 +337,7 @@ export default function ThreadCard({ thread }: { thread: IThread }) {
         title="Xóa bài viết?"
         message="Hành động này sẽ xóa bài viết vĩnh viễn và không thể khôi phục. Bạn có chắc chắn không?"
         isDanger={true}
-        confirmText={deleteMutation.isPending ? "Đang xóa..." : "Xóa vĩnh viễn"}
+        
         onConfirm={() => deleteMutation.mutate(thread.thread_id)}
         onCancel={() => setIsDeleteModalOpen(false)}
       />

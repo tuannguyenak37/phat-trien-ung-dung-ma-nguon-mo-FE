@@ -50,7 +50,7 @@ export default function LoginPage() {
       toast.success(`Chào mừng trở lại, ${data.firstName}!`); // ✨ UX
 
       if (data.role === "admin") {
-        router.push("/admin/dashboard");
+        router.push("/admin/users");
       } else {
         router.push("/home");
       }

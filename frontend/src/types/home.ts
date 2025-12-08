@@ -1,6 +1,7 @@
 export interface HomeList {
   page?: number;
   limit?: number;
+  sort_by?:"mix"
 }
 export interface Media {
   media_id: string;

@@ -6,7 +6,7 @@ import  {sheach,ThreadResponse} from "@/types/thread"
 const APIThreads = {
   // Lấy danh sách (Feed) - API chính cho trang chủ
   getFeed: async (params: HomeList) => {
-    return await axios.get("/threads", { params });
+    return await axios.get("/threads/list", { params });
   },
 
   // Tạo bài viết mới (Gửi FormData chứa file)
