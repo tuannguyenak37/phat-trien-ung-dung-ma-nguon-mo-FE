@@ -1,7 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { commentApi } from "@/lib/API/comment";
-import CommentItem from "./CommentItem";
+import CommentItem, { CommentData } from "./CommentItem"; 
 import CommentInput from "./CommentInput";
 
 interface CommentSectionProps {
@@ -24,8 +24,8 @@ export default function CommentSection({ threadId, commentCount }: CommentSectio
             Bình luận <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-xs font-extrabold">{commentCount}</span>
           </h3>
           
-          {/* Dropdown sắp xếp (Ví dụ - có thể phát triển sau) */}
-          <select className="text-xs font-medium text-gray-500 bg-transparent border-none outline-none cursor-pointer hover:text-gray-800">
+          {/* Dropdown sắp xếp */}
+          <select className="text-xs font-medium text-gray-500 bg-transparent border-none outline-none cursor-pointer hover:text-gray-800 focus:ring-0">
              <option value="newest">Mới nhất</option>
              <option value="top">Phổ biến nhất</option>
           </select>
@@ -37,7 +37,8 @@ export default function CommentSection({ threadId, commentCount }: CommentSectio
       </div>
 
       {/* Danh sách Comment */}
-      <div className="space-y-6">
+      {/* 👇 ĐÃ CẬP NHẬT: Thêm pb-24 để tránh bị che nội dung dưới cùng */}
+      <div className="space-y-6 pb-24">
         {isLoading ? (
            // Skeleton Loading cho danh sách
            <div className="space-y-4 animate-pulse">
@@ -57,15 +58,20 @@ export default function CommentSection({ threadId, commentCount }: CommentSectio
                    Chưa có bình luận nào. Hãy là người đầu tiên!
                </div>
            ) : (
+               // Ép kiểu 'as CommentData' để sửa lỗi user_id missing
                data?.data.map((comment) => (
-                 <CommentItem key={comment.comment_id} comment={comment} threadId={threadId} />
+                 <CommentItem 
+                    key={comment.comment_id} 
+                    comment={comment as CommentData} 
+                    threadId={threadId} 
+                 />
                ))
            )
         )}
         
         {/* Nút Load more */}
         {(data?.total || 0) > (data?.data.length || 0) && (
-            <button className="w-full py-2.5 mt-4 text-sm font-semibold text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors border border-dashed border-gray-200 hover:border-primary/20">
+            <button className="w-full py-2.5 mt-4 text-sm font-semibold text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-dashed border-gray-200 hover:border-blue-200">
                 Xem thêm bình luận cũ hơn
             </button>
         )}

@@ -42,7 +42,7 @@ export const useUser = () => {
 
         // Chỉ set khi có role để tránh set rác vào store
         if (newUserInfo.role) {
-          // console.log("🔄 Sync User:", newUserInfo.role);
+          
           setUser(newUserInfo);
         }
       }

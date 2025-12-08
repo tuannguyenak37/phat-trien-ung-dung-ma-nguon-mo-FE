@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/API/axiosConfig"; // Import cái axios xịn xò đã config
-
+import {categoriesPopularList,tagPopularList} from "@/types/categories"
 // 1. Type cho Category trả về
 interface Category {
   category_id: string;
@@ -49,6 +49,15 @@ export const categoryService = {
   category_theads : async ()=>{
     return await axiosInstance.get("/public/categories/get")
     
-  }
+  },
+  tagPopular: async () => {
+  const res = await axiosInstance.get<tagPopularList>("/public/tags/popular");
+  return res.data;
+},
+
+categoriesPopular : async ()=>{
+  const res = await axiosInstance.get<categoriesPopularList>("/public/categories/popular")
+  return res.data
+}
 
 };

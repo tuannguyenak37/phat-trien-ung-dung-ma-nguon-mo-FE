@@ -16,6 +16,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   FireIcon
 } from "@heroicons/react/24/outline";
+import SearchBar from "../ui/SearchBar";
 import { motion, AnimatePresence } from "framer-motion";
 
 // --- LOGO COMPONENT (Modernized) ---
@@ -76,7 +77,7 @@ export default function Navbar() {
           
           {/* 1. LEFT: LOGO & DESKTOP NAV */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="shrink-0">
+            <Link href="/home" className="shrink-0">
               <Logo />
             </Link>
 
@@ -103,7 +104,7 @@ export default function Navbar() {
 
           {/* 2. MIDDLE: SEARCH BAR (Responsive) */}
           <div className={`hidden md:block flex-1 max-w-md transition-all duration-300 ${isSearchFocused ? "scale-105" : ""}`}>
-            <div className={`relative flex items-center w-full rounded-full transition-all duration-200 ${
+            {/* <div className={`relative flex items-center w-full rounded-full transition-all duration-200 ${
                 isSearchFocused 
                 ? "bg-white ring-2 ring-primary/20 shadow-lg shadow-primary/5" 
                 : "bg-gray-100 hover:bg-gray-200/70"
@@ -116,7 +117,8 @@ export default function Navbar() {
                 onBlur={() => setIsSearchFocused(false)}
                 className="w-full bg-transparent border-none focus:ring-0 text-sm text-gray-900 placeholder-gray-500 py-2.5 pl-3 pr-4 rounded-full"
               />
-            </div>
+            </div> */}
+            <SearchBar/>
           </div>
 
           {/* 3. RIGHT: ACTIONS & USER */}

@@ -1,11 +1,12 @@
+
 import axios from "./axiosConfig";
 import { HomeList } from "@/types/home";
-
+import  {sheach,ThreadResponse} from "@/types/thread"
 // --- 1. MANAGEMENT THREADS API (Thao tác Create/Update/Delete) ---
 const APIThreads = {
   // Lấy danh sách (Feed) - API chính cho trang chủ
   getFeed: async (params: HomeList) => {
-    return await axios.get("/public", { params });
+    return await axios.get("/threads", { params });
   },
 
   // Tạo bài viết mới (Gửi FormData chứa file)
@@ -22,7 +23,7 @@ const APIThreads = {
 
   // Cập nhật bài viết
   update: async (id: string, formData: FormData) => {
-    return await axios.put(`/threads/${id}`, formData, {
+    return await axios.put<ThreadResponse>(`/threads/${id}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
@@ -40,7 +41,7 @@ const APIPublicThreads = {
     return await axios.get(`/public/${id}`);
   },
 
-  // Lấy bài viết theo Slug (SEO cơ bản)
+
   getBySlug: async (slug: string) => {
     return await axios.get(`/public/slug/${slug}`);
   },
@@ -54,6 +55,10 @@ const APIPublicThreads = {
   getUserThreads: async (userId: string, params: HomeList) => {
     return await axios.get(`/public/users/profile/${userId}`, { params });
   },
+  sheach: async (data :sheach)=>{
+  const res= await axios.get("public/seach/smart",{params:data})
+    return res.data
+  }
 };
 
 // --- EXPORT ---
@@ -61,10 +66,10 @@ const api = {
   ...APIThreads,
   public: APIPublicThreads,
   
-  // Alias giữ lại để tương thích code cũ của bạn (nếu cần)
+
   APIhome: APIThreads.getFeed,
   APICreate: APIThreads.create,
-  APIgetThreadById: APIPublicThreads.getUserThreads, // Lưu ý: Hàm cũ của bạn tên là getThreadById nhưng logic là lấy User Threads
+  APIgetThreadById: APIPublicThreads.getUserThreads, 
 };
 
 export default api;
