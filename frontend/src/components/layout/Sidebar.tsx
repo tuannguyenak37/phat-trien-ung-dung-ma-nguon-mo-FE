@@ -103,7 +103,7 @@ const Sidebar = () => {
             return (
               <Link
                 key={cat.category_id}
-                // CHUYỂN LINK VỀ TRANG CHỦ KÈM PARAM CATEGORY_ID
+                
                 href={`/home?category_id=${cat.category_id}`} 
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${
                     isCatActive 
