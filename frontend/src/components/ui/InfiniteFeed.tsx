@@ -3,78 +3,93 @@
 import { useEffect, useState, useCallback } from "react";
 import { useInView } from "react-intersection-observer";
 import { FireIcon } from "@heroicons/react/24/solid";
-
-// 1. Import API Service và Component
-import api from "@/lib/API/thead"; 
-import ThreadCard from "./ThreadCard"; 
-
-// 2. Import Type mới chuẩn chỉnh
-import type { IThread, IThreadListResponse } from "@/types/thread"; 
+import ThreadCard from "./ThreadCard";
+import type { IThread, IThreadListResponse } from "@/types/thread";
+// Import Type của tham số truyền vào (để TypeScript hiểu)
+import type {HomeList} from "@/types/home"
 
 interface Props {
-  initialData: IThreadListResponse; // Dữ liệu ban đầu từ Server Side Render (SSR)
+  initialData: IThreadListResponse; // Dữ liệu trang 1
+  // THAY ĐỔI QUAN TRỌNG: Nhận hàm gọi API từ props
+  fetchData: (params: HomeList) => Promise<any>; 
+  
+  // Các bộ lọc
+  category_id?: string | null;
+  tag?: string | null;
+  sort_by?: "mix" | "newest" | "trending";
 }
 
-export default function InfiniteFeed({ initialData }: Props) {
-  // State lưu danh sách bài viết
+export default function InfiniteFeed({ 
+  initialData, 
+  fetchData,          // Hàm này được truyền từ cha vào (ví dụ: getThreads)
+  category_id = null, 
+  tag = null,         
+  sort_by = "mix"     
+}: Props) {
+  
   const [threads, setThreads] = useState<IThread[]>(initialData.data || []);
-  
-  // State phân trang (Bắt đầu từ trang 2 vì trang 1 đã có ở initialData)
   const [page, setPage] = useState(2);
-  
-  // State loading & check còn dữ liệu không
   const [isLoading, setIsLoading] = useState(false);
   
-  // Logic check hasMore: Nếu mảng ban đầu trả về ít hơn size (limit) -> Hết dữ liệu ngay
+  // Tính toán hasMore dựa trên initialData
   const [hasMore, setHasMore] = useState(
     (initialData.data?.length || 0) >= (initialData.size || 10)
   );
 
-  // Hook detect khi user cuộn xuống cuối
   const { ref, inView } = useInView({
     threshold: 0,
-    rootMargin: "200px", // Trigger sớm trước 200px để trải nghiệm mượt hơn
+    rootMargin: "200px",
   });
 
-  // 3. Hàm Load More (Goi API)
+  // --- QUAN TRỌNG: RESET KHI PARAM THAY ĐỔI ---
+  // Giúp component "chạy luôn" dữ liệu mới khi user đổi từ Tag A sang Tag B
+  // hoặc từ Home sang Category mà không cần reload trang
+  useEffect(() => {
+    setThreads(initialData.data || []);
+    setPage(2);
+    setHasMore((initialData.data?.length || 0) >= (initialData.size || 10));
+    setIsLoading(false);
+  }, [initialData]); // Chỉ cần theo dõi initialData (vì cha đã fetch lại khi params đổi)
+
+  // --- HÀM LOAD MORE ---
   const loadMore = useCallback(async () => {
-    // Chặn nếu đang load hoặc đã hết dữ liệu
     if (isLoading || !hasMore) return;
 
     setIsLoading(true);
 
     try {
-      // Gọi API getFeed từ service (Page động, limit lấy theo initialData)
-      const res = await api.getFeed({ 
+      // Gọi hàm fetchData được truyền từ Props
+      const res = await fetchData({ 
           page: page, 
-          limit: initialData.size 
+          limit: initialData.size || 10,
+          sort_by: sort_by,
+          category_id: category_id, 
+          tag: tag                  
       });
 
-      if (res && res.data && res.data.length > 0) {
-        // Nối dữ liệu mới vào
-        setThreads((prev) => [...prev, ...res.data]);
-        
-        // Tăng page
+      // Xử lý kết quả trả về
+      // Kiểm tra res hoặc res.data tùy cấu trúc trả về của hàm fetchData
+      const newThreads = res?.data || res || []; 
+
+      if (newThreads.length > 0) {
+        setThreads((prev) => [...prev, ...newThreads]);
         setPage((prev) => prev + 1);
 
-        // Kiểm tra xem đã hết dữ liệu chưa
-        // Nếu số lượng trả về < limit yêu cầu -> Chắc chắn là trang cuối
-        if (res.data.length < initialData.size) {
+        if (newThreads.length < (initialData.size || 10)) {
           setHasMore(false);
         }
       } else {
-        // Trả về rỗng -> Hết dữ liệu
         setHasMore(false);
       }
     } catch (error) {
-      console.error("Error loading threads:", error);
-      // Có thể setHasMore(false) nếu muốn dừng khi lỗi
+      console.error("Lỗi tải thêm:", error);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
-  }, [page, hasMore, isLoading, initialData.size]);
+  }, [page, hasMore, isLoading, initialData.size, category_id, tag, sort_by, fetchData]);
 
-  // 4. Trigger khi cuộn xuống
+  // Trigger khi cuộn xuống đáy
   useEffect(() => {
     if (inView && hasMore && !isLoading) {
       loadMore();
@@ -83,14 +98,12 @@ export default function InfiniteFeed({ initialData }: Props) {
 
   return (
     <div className="w-full max-w-3xl mx-auto pb-10">
-      {/* Danh sách bài viết */}
       <div className="flex flex-col gap-6">
         {threads.map((thread) => (
           <ThreadCard key={thread.thread_id} thread={thread} />
         ))}
       </div>
 
-      {/* Loading Spinner / End Message */}
       <div ref={ref} className="mt-8 flex justify-center py-6 min-h-[60px]">
         {hasMore ? (
           <div className="flex flex-col items-center gap-2 animate-pulse">

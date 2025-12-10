@@ -1,7 +1,10 @@
+
 export interface HomeList {
   page?: number;
   limit?: number;
-  sort_by?:"mix"
+  sort_by?: "mix" | "newest" | "trending";
+  category_id? : string | null;
+  tag? : string | null;
 }
 export interface Media {
   media_id: string;

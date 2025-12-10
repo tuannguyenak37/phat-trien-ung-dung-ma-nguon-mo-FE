@@ -1,13 +1,26 @@
 "use server";
 
 import APIhome from "@/lib/API/thead"; // Đổi đường dẫn tới file APIhome của bạn
-
-export async function getThreads(page: number = 1, limit: number = 10) {
+import { HomeList } from "@/types/home";
+export async function getThreads(params?: HomeList) {
   try {
-    const res = await APIhome.APIhome({ page, limit });
+    // Thiết lập giá trị mặc định
+    const defaultParams: HomeList = {
+      page: 1,
+      limit: 10,
+      sort_by: "mix",
+      category_id: null,
+      tag: null,
+      
+    };
 
-    // Axios trả về object { data: ApiResponse, status: 200, ... }
-    // Chúng ta cần lấy phần .data bên trong, nó khớp với interface ApiResponse
+    // Gộp tham số người dùng truyền vào với mặc định
+    const finalParams = { ...defaultParams, ...params };
+
+    // Gọi API
+    const res = await APIhome.APIhome(finalParams);
+
+    // Trả về data
     return res.data;
   } catch (error) {
     console.error("Lỗi lấy dữ liệu:", error);
