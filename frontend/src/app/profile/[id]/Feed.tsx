@@ -2,8 +2,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
-import ThreadAPI from "@/lib/API/thead"; // Chú ý: bạn đang để tên file là "thead", nên sửa thành "thread" cho chuẩn
-import Image from "next/image";
+import ThreadAPI from "@/lib/API/thead";
 import ThreadCard from "@/components/ui/ThreadCard";
 
 export default function Feed({ userId }: { userId: string }) {
@@ -21,36 +20,38 @@ export default function Feed({ userId }: { userId: string }) {
       ThreadAPI.APIgetThreadById(userId, { page: pageParam, limit: 10 }),
     initialPageParam: 1,
     getNextPageParam: (lastPage: any) => {
-      // Logic lấy data response
       const responseData = lastPage.data || lastPage;
-
-      // Tính tổng số trang
       const totalPages = Math.ceil(responseData.total / responseData.size);
-
-      if (responseData.page < totalPages) {
-        return responseData.page + 1;
-      }
-      return undefined;
+      return responseData.page < totalPages
+        ? responseData.page + 1
+        : undefined;
     },
   });
 
-  // --- SỬA Ở ĐÂY: Đưa useEffect lên trên các câu lệnh return ---
+  // Auto load khi scroll
   useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
+    if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
-  // -------------------------------------------------------------
 
-  // Bây giờ mới được return sớm
-  if (status === "pending") return <div className="p-4 text-center">Loading feed...</div>;
-  if (status === "error") return <div className="p-4 text-center text-red-500">Error loading posts</div>;
+  // Loading / Error UI
+  if (status === "pending")
+    return (
+      <div className="p-6 text-center text-slate-600 text-sm animate-pulse">
+        Đang tải bài viết...
+      </div>
+    );
+
+  if (status === "error")
+    return (
+      <div className="p-6 text-center text-red-500 font-medium">
+        Không thể tải dữ liệu
+      </div>
+    );
 
   return (
     <div className="space-y-6">
       {data?.pages.map((group: any, i) => {
-        // Handle data vs axios response
-        const posts = group.data?.data || group.data || []; 
+        const posts = group.data?.data || group.data || [];
 
         return (
           <div key={i} className="space-y-6">
@@ -61,15 +62,19 @@ export default function Feed({ userId }: { userId: string }) {
         );
       })}
 
-      <div ref={ref} className="h-10 flex justify-center items-center mt-4">
+      {/* Load More Indicator */}
+      <div
+        ref={ref}
+        className="h-12 flex justify-center items-center mt-2 text-sm"
+      >
         {isFetchingNextPage ? (
-          <span className="text-blue-500 text-sm font-medium animate-pulse">
-            Loading more...
+          <span className="text-blue-500 font-medium animate-pulse">
+            Đang tải thêm...
           </span>
         ) : hasNextPage ? (
-          <span className="text-gray-400 text-sm">Scroll for more</span>
+          <span className="text-slate-400">Kéo xuống để tiếp tục</span>
         ) : (
-          <span className="text-gray-400 text-sm">No more posts</span>
+          <span className="text-slate-400">Đã hết bài viết</span>
         )}
       </div>
     </div>
