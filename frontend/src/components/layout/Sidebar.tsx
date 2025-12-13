@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation"; // Import hook để lấy params hiện tại
