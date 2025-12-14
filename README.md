@@ -102,8 +102,10 @@ Sau khi màn hình chúc mừng hiện ra, Vercel sẽ cung cấp một đườn
 <div align="center">
 
 📸 Demo Giao Diện
-![image](image.png)
-
+<p align="center">
+  <img src="./image.png" width="200">
+  
+</p>
 </div>
 
 © 12/2025 - Nhóm 11: Community Forum Sản phẩm thuộc bài tập lớn môn Phát triển ứng dụng mã nguồn mở.
