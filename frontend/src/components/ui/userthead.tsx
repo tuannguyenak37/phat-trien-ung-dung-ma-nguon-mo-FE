@@ -74,9 +74,9 @@ export default function UserThead({ id }: UserTheadProps) {
           {user?.firstName || "Người dùng"} {user?.lastName || "Ẩn danh"}
         </Link>
         
-        {/* Role hoặc Username phụ (nếu có) để tạo chiều sâu */}
+       
         <span className="text-xs text-gray-500 font-medium mt-0.5 group-hover:text-gray-600 transition-colors">
-            {user?.firstName ? user.firstName.toLowerCase() : "user"} 
+            
             <ReputationBadge score={user?.reputation_score || 0} size="sm" />
         </span>
       </div>
