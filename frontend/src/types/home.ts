@@ -5,6 +5,7 @@ export interface HomeList {
   sort_by?: "mix" | "newest" | "trending";
   category_id? : string | null;
   tag? : string | null;
+  is_locked:boolean;
 }
 export interface Media {
   media_id: string;

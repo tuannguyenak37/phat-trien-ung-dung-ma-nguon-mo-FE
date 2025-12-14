@@ -58,7 +58,7 @@ const UserWidget = () => {
   return (
     <div className="mb-6 rounded-2xl border border-blue-100 bg-white overflow-hidden shadow-sm shadow-blue-50 group">
       {/* Cover: Gradient xanh nhẹ */}
-      <div className="h-24 bg-gradient-to-r from-blue-200 via-blue-100 to-white"></div>
+      <div className="h-24 gradient-to-r from-blue-200 via-blue-100 to-white"></div>
 
       <div className="px-5 pb-5 -mt-12 relative">
         {/* Avatar & Edit Button */}

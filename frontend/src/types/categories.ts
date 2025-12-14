@@ -2,6 +2,7 @@
 export interface tagPopular{
     name : string;
     tag_id : string;
+    count : number;
 
 }
 export interface categoriesPopular {
@@ -80,8 +81,7 @@ export interface CategoryGrowthResponse {
   data: GrowthDataPoint[];
 }
 
-// 3. RESPONSE: TỶ LỆ PHÂN BỐ (Pie Chart)
-// API: /admin/stats/distribution
+
 export interface CategoryDistributionItem {
   category_id: string;
   name: string;

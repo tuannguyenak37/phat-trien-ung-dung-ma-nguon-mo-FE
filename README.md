@@ -5,7 +5,12 @@
 
 **Môn học:** Phát triển ứng dụng mã nguồn mở  
 **Giảng viên hướng dẫn:** GV. Lê Duy Hùng
+## 🔗 Link Source Code
 
+| Thành phần | Đường dẫn Repository (GitHub) | Mô tả ngắn |
+| :--- | :--- | :--- |
+| **Backend (Server)** | [`phat-trien-ung-dung-ma-nguon-mo-BE`](https://github.com/username/phat-trien-ung-dung-ma-nguon-mo-BE) | Chứa mã nguồn API, cấu hình kết nối Database (PostgreSQL), Migrations, và các logic xử lý nghiệp vụ. |
+| **Frontend (Client)** | [`phat-trien-ung-dung-ma-nguon-mo-FE`](https://github.com/username/phat-trien-ung-dung-ma-nguon-mo-FE) | Chứa mã nguồn giao diện người dùng, xử lý gọi API, và các tài nguyên tĩnh (Images, CSS). |
 </div>
 
 ## 👥 Thành Viên Nhóm

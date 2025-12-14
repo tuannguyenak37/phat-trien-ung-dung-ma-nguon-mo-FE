@@ -60,8 +60,13 @@ export const categoryService = {
     return await axiosInstance.get("/public/categories/get")
     
   },
-  tagPopular: async () => {
-  const res = await axiosInstance.get<tagPopularList>("/public/tags/popular");
+  tagPopular: async (limit: number = 10) => {
+  const res = await axiosInstance.get<tagPopularList>(
+    "/public/tags/popular",
+    {
+      params: { limit }
+    }
+  );
   return res.data;
 },
 
@@ -94,6 +99,9 @@ getDistribution: async (params?: DistributionParams): Promise<CategoryDistributi
     return data;
     
   },
+   deleteTag : async (id:string)=>{
+    return await axiosInstance.delete(`router_dashboard/admin/tags/${id}`)
+  }
 
 
 };
