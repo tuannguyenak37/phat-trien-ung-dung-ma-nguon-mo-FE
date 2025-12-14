@@ -102,7 +102,7 @@ Sau khi màn hình chúc mừng hiện ra, Vercel sẽ cung cấp một đườn
 <div align="center">
 
 📸 Demo Giao Diện
-![alt text](image.png)
+![image](image.png)
 
 </div>
 
