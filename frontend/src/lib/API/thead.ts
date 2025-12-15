@@ -1,7 +1,7 @@
 
 import axios from "./axiosConfig";
 import { HomeList } from "@/types/home";
-import  {sheach,ThreadResponse} from "@/types/thread"
+import  {sheach,ThreadResponse,ILockThreadPayload} from "@/types/thread"
 // --- 1. MANAGEMENT THREADS API (Thao tác Create/Update/Delete) ---
 const APIThreads = {
   // Lấy danh sách (Feed) - API chính cho trang chủ
@@ -25,6 +25,7 @@ const APIThreads = {
   update: async (id: string, formData: FormData) => {
     return await axios.put<ThreadResponse>(`/threads/${id}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
+
     });
   },
 
@@ -32,6 +33,15 @@ const APIThreads = {
   delete: async (id: string) => {
     return await axios.delete(`/threads/${id}`);
   },
+  lockAndWarnThread: async (threadId: string, payload: ILockThreadPayload) => {
+    // URL: /api/admin/threads/{thread_id}/lock
+    const url = `/api/admin/threads/${threadId}/lock`;
+    
+    // Gọi method POST
+    const response = await axios.post(url, payload);
+    
+    return response.data;
+  }
 };
 
 // --- 2. PUBLIC VIEW API (Dùng cho trang xem chi tiết & SEO) ---
@@ -58,7 +68,8 @@ const APIPublicThreads = {
   sheach: async (data :sheach)=>{
   const res= await axios.get("public/seach/smart",{params:data})
     return res.data
-  }
+  },
+  
 };
 
 // --- EXPORT ---

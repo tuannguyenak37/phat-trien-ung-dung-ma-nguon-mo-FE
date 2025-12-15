@@ -8,7 +8,8 @@ export interface IThreadUser {
   user_id: string;
   firstName: string;
   lastName: string;
-  url_avatar: string | null; // Có thể null
+  url_avatar: string | null;
+  email: string |null;
 }
 
 // Thông tin Danh mục (Category)
@@ -58,6 +59,7 @@ export interface IThread {
   category: IThreadCategory;
   tags: IThreadTag[];
   media: IThreadMedia[];
+  is_locked: boolean;
 
   // Optional: Chỉ có khi user đã đăng nhập & Backend có xử lý check vote
   vote_stats?: IVoteStats;
@@ -154,4 +156,9 @@ export interface ThreadResponse {
   category: Category;
   tags: string[]; // Giả sử tags là mảng string
   media: Media[]; // Hoặc any[] nếu chưa rõ cấu trúc bên trong
+}
+export interface ILockThreadPayload {
+  email: string;  // Email người bị cảnh báo
+  status: boolean; // true = Khóa, false = Chỉ cảnh báo (tùy logic backend)
+  reason: string;  // Lý do khóa/cảnh báo
 }

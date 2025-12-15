@@ -5,7 +5,7 @@ export interface HomeList {
   sort_by?: "mix" | "newest" | "trending";
   category_id? : string | null;
   tag? : string | null;
-  is_locked:boolean;
+ 
 }
 export interface Media {
   media_id: string;
@@ -33,6 +33,7 @@ export interface Thread {
   title: string;
   content: string;
   created_at: string;
+   is_locked:boolean;
   tags: Tag[];
   media: Media[];
 comment_count: number;

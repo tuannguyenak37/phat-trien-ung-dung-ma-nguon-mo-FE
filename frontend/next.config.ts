@@ -31,8 +31,7 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  /* 3. Cấu hình Build (Giúp quá trình deploy dễ dàng hơn) */
-  // Key 'eslint' bị xóa theo cảnh báo của Next.js 16+
+  
   typescript: {
     ignoreBuildErrors: true,
   },
