@@ -21,12 +21,13 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/static/**",
       },
-      // Khi triển khai Production, bạn sẽ thêm cấu hình HTTPS tại đây:
-      // {
-      //   protocol: "https",
-      //   hostname: "api.ten-mien-cua-ban.com", 
-      //   pathname: "/static/**",
-      // },
+      // 2. 🔥 QUAN TRỌNG: Cho phép domain Backend trên Render (Để chạy trên Vercel)
+      {
+        protocol: "https",
+        hostname: "phat-trien-ung-dung-ma-nguon-mo-be.onrender.com",
+        port: "", // HTTPS mặc định không cần port
+        pathname: "/static/**",
+      },
     ],
   },
 
