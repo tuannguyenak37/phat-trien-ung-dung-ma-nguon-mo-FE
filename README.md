@@ -1,116 +1,143 @@
 <div align="center">
 
 # 🌐 ĐỀ TÀI 11: COMMUNITY FORUM
-### (Diễn đàn thảo luận và chia sẻ kiến thức trực tuyến)
+### Diễn đàn thảo luận và chia sẻ kiến thức trực tuyến
+
+![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+
+---
 
 **Môn học:** Phát triển ứng dụng mã nguồn mở  
-**Giảng viên hướng dẫn:** GV. Lê Duy Hùng
-## 🔗 Link Source Code
+**Giảng viên hướng dẫn:** GV. Lê Duy Hùng  
+**Học kỳ:** 1 - Năm học: 2025 - 2026
 
-| Thành phần | Đường dẫn Repository (GitHub) | Mô tả ngắn |
-| :--- | :--- | :--- |
-| **Backend (Server)** | [`phat-trien-ung-dung-ma-nguon-mo-BE`](https://github.com/username/phat-trien-ung-dung-ma-nguon-mo-BE) | Chứa mã nguồn API, cấu hình kết nối Database (PostgreSQL), Migrations, và các logic xử lý nghiệp vụ. |
-| **Frontend (Client)** | [`phat-trien-ung-dung-ma-nguon-mo-FE`](https://github.com/username/phat-trien-ung-dung-ma-nguon-mo-FE) | Chứa mã nguồn giao diện người dùng, xử lý gọi API, và các tài nguyên tĩnh (Images, CSS). |
+---
+
 </div>
 
-## 👥 Thành Viên Nhóm
+## 👥 Thành Viên Nhóm 11
 
 | STT | Họ và Tên | Mã Sinh Viên | Vai Trò | GitHub |
 |:---:|:---|:---:|:---|:---:|
-| 1 | **Nguyễn Văn Tuấn** | 23050150 | Trưởng nhóm (fullstack)
-| 2 | **Nguyễn Thị Vân Khánh** | 23050183 | Thành viên (Frontend/UI-UX) | 
+| 1 | **Nguyễn Văn Tuấn** | 23050150 | Trưởng nhóm (Fullstack) | [@tuannguyenak37](https://github.com/tuannguyenak37) |
+| 2 | **Nguyễn Thị Vân Khánh** | 23050183 | Thành viên (Frontend/UI-UX) | ... |
+
+---
+
+## 🔗 Repository Source Code
+
+| Thành phần | Đường dẫn Repository | Mô tả ngắn |
+| :--- | :--- | :--- |
+| **Backend (Server)** | [![GitHub](https://img.shields.io/badge/GitHub-Backend-181717?logo=github)](https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-BE) | Chứa mã nguồn API (FastAPI), cấu hình Database (PostgreSQL), Migrations. |
+| **Frontend (Client)** | [![GitHub](https://img.shields.io/badge/GitHub-Frontend-181717?logo=github)](https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-FE) | Chứa mã nguồn giao diện (Next.js), xử lý gọi API, và tài nguyên tĩnh. |
 
 ---
 
 ## 📖 1. Tổng Quan Đề Tài
 
-**Community Forum** là một nền tảng mã nguồn mở hiện đại, nơi người dùng có thể đặt câu hỏi, chia sẻ kiến thức và thảo luận về các chủ đề khác nhau. Dự án tập trung vào trải nghiệm người dùng mượt mà (SPA) và khả năng tương tác thời gian thực.
+**Community Forum** là một nền tảng mã nguồn mở hiện đại, nơi người dùng có thể đặt câu hỏi, chia sẻ kiến thức và thảo luận về các chủ đề khác nhau. Dự án tập trung vào trải nghiệm người dùng mượt mà (SPA), tối ưu hóa SEO và khả năng tương tác nhanh chóng.
 
 ## 🛠 2. Công Nghệ Sử Dụng
 
-Dự án được xây dựng trên Next.js framework mạnh mẽ:
-
-| Thành phần | Công nghệ |
+| Phân hệ | Công nghệ |
 | :--- | :--- |
-| **Frontend** | Next.js Tailwind CSS |
-| **Backend** | fastapi|
-| **Database** | PostgreSQL  |
-| **State Management** | React Context API / Zustand |
-| **Deployment** | Vercel Platform |
+| **Frontend** | `Next.js 14+` `Tailwind CSS` `React Query` |
+| **Backend** | `FastAPI (Python)` `SQLAlchemy` `Pydantic` |
+| **Database** | `PostgreSQL` |
+| **Authentication** | `JWT` / `NextAuth.js` |
+| **Deployment** | `Vercel` (Frontend) & `Render/Railway` (Backend) |
 
 ---
 
 ## 🚀 3. Hướng Dẫn Cài Đặt (Local Development)
 
-Để chạy dự án trên máy cá nhân, vui lòng thực hiện các bước sau:
+Để chạy toàn bộ dự án, bạn cần cài đặt cả Backend và Frontend.
 
-### Bước 1: Clone dự án
+### 🅰️ Phần Backend (API)
+
+**Bước 1:** Clone và truy cập thư mục Backend
 ```bash
-git clone dự án
-cd frontend
+git clone [https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-BE.git](https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-BE.git)
+cd phat-trien-ung-dung-ma-nguon-mo-BE
+Bước 2: Tạo môi trường ảo và cài đặt thư viện
+
+Bash
+
+python -m venv venv
+# Windows:
+.\venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+pip install -r requirements.txt
+Bước 3: Cấu hình biến môi trường (.env) Tạo file .env và điền thông tin Database PostgreSQL:
+
+Đoạn mã
+
+DATABASE_URL="postgresql://user:password@localhost:5432/community_db"
+SECRET_KEY="your_secret_key_here"
+Bước 4: Chạy Server
+
+Bash
+
+uvicorn main:app --reload
+# API sẽ chạy tại: http://localhost:8000
+🅱️ Phần Frontend (Client)
+Bước 1: Clone và truy cập thư mục Frontend
+
+Bash
+
+git clone [https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-FE.git](https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-FE.git)
+cd phat-trien-ung-dung-ma-nguon-mo-FE
 Bước 2: Cài đặt thư viện
+
 Bash
 
 npm install
 # hoặc
 yarn install
-Bước 3: Cấu hình biến môi trường (.env)
-Tạo file .env tại thư mục gốc và điền các thông số kết nối Database/Auth:
+Bước 3: Cấu hình biến môi trường (.env.local)
 
 Đoạn mã
 
-DATABASE_URL="mongodb+srv://..."
-NEXTAUTH_SECRET="your_secret_key"
+NEXT_PUBLIC_API_URL="http://localhost:8000"
+NEXTAUTH_SECRET="your_nextauth_secret"
 NEXTAUTH_URL="http://localhost:3000"
 Bước 4: Chạy ứng dụng
+
 Bash
 
 npm run dev
-Truy cập trình duyệt tại: http://localhost:3000
-
+# Truy cập trình duyệt tại: http://localhost:3000
 ☁️ 4. Hướng Dẫn Triển Khai (Deploy) trên Vercel
-Dự án này được tối ưu hóa để deploy trên Vercel - Nền tảng Cloud tốt nhất cho Next.js.
+Dự án Frontend được tối ưu hóa để deploy trên Vercel.
 
-Quy trình Deploy chi tiết:
-Chuẩn bị Source Code:
+Chuẩn bị: Đảm bảo code Frontend đã được push lên GitHub.
 
-Đảm bảo code đã được commit và push lên GitHub (hoặc GitLab/Bitbucket).
+Đăng nhập: Truy cập Vercel và đăng nhập bằng GitHub.
 
-Đăng nhập Vercel:
+Tạo Project:
 
-Truy cập vercel.com và đăng nhập bằng tài khoản GitHub.
+Chọn "Add New..." ➝ "Project".
 
-Tạo Project mới:
+Import repository phat-trien-ung-dung-ma-nguon-mo-FE.
 
-Tại Dashboard, nhấn nút "Add New..." ➝ chọn "Project".
+Cấu hình (Configure):
 
-Tại mục Import Git Repository, tìm và chọn repo community-forum của nhóm.
+Framework Preset: Next.js.
 
-Cấu hình Project (Configure Project):
+Environment Variables: Copy nội dung từ .env.local vào đây (Lưu ý: Thay đổi NEXT_PUBLIC_API_URL thành domain thật của Backend đã deploy).
 
-Framework Preset: Vercel sẽ tự động nhận diện là Next.js.
+Deploy: Nhấn nút "Deploy" và chờ khoảng 1-2 phút.
 
-Root Directory: ./ (để mặc định).
-
-Environment Variables: Mở rộng phần này. Bạn cần copy toàn bộ nội dung trong file .env (ở máy local) và dán vào đây để Server trên Vercel có thể kết nối được Database.
-
-Thực hiện Deploy:
-
-Nhấn nút "Deploy".
-
-Chờ khoảng 1-2 phút để Vercel tiến hành Build và khởi tạo Serverless Functions.
-
-Hoàn tất:
-
-Sau khi màn hình chúc mừng hiện ra, Vercel sẽ cung cấp một đường link (domain) chính thức cho dự án (ví dụ: https://community-forum-nhom11.vercel.app).
+📸 Demo Giao Diện
+<div align="center"> <img src="./image.png" alt="Giao diện trang chủ" width="45%" style="margin-right: 10px;"> <img src="./image-1.png" alt="Giao diện thảo luận" width="45%"> </div>
 
 <div align="center">
 
-📸 Demo Giao Diện
-<p align="center">
-  <img src="./image.png" width="200">
-  
-</p>
-</div>
-
 © 12/2025 - Nhóm 11: Community Forum Sản phẩm thuộc bài tập lớn môn Phát triển ứng dụng mã nguồn mở.
+
+</div>
