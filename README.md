@@ -1,3 +1,24 @@
+Chào bạn Cinis,
+
+Lỗi bạn gặp phải thường do 2 nguyên nhân chính khi hiển thị trên GitHub (hoặc các trình render Markdown phổ biến):
+
+Thuộc tính style="..." bị chặn: GitHub Flavored Markdown sẽ loại bỏ (strip) các thuộc tính style inline vì lý do bảo mật. Do đó style="margin-right: 10px;" sẽ không hoạt động.
+
+Khoảng trắng (Spacing): Đôi khi viết thẻ HTML dính liền nhau hoặc dính liền với text mà không xuống dòng có thể gây lỗi hiển thị.
+
+Dưới đây là phiên bản README.md đã được sửa lỗi hoàn chỉnh. Mình đã thay thế phần style bằng cách dùng khoảng trắng tự nhiên và chỉnh lại cấu trúc thẻ div ở cuối cho chuẩn.
+
+Các thay đổi chính mình đã thực hiện:
+Phần Ảnh demo: Bỏ style, dùng &nbsp; (khoảng trắng cứng) để tạo khoảng cách giữa 2 ảnh.
+
+Phần Footer: Đảm bảo thẻ đóng </div> nằm riêng một dòng và nội dung bên trong được bao bọc thẻ <p> hoặc để trần nhưng có xuống dòng rõ ràng.
+
+Clean code: Mình đã sửa lại format các block code (bash) ở phần hướng dẫn cài đặt bị lỗi dư link Markdown.
+
+Bạn có thể copy toàn bộ nội dung dưới đây vào file README.md của bạn nhé:
+
+Markdown
+
 <div align="center">
 
 # 🌐 ĐỀ TÀI 11: COMMUNITY FORUM
@@ -23,7 +44,7 @@
 | STT | Họ và Tên | Mã Sinh Viên | Vai Trò | GitHub |
 |:---:|:---|:---:|:---|:---:|
 | 1 | **Nguyễn Văn Tuấn** | 23050150 | Trưởng nhóm (Fullstack) | [@tuannguyenak37](https://github.com/tuannguyenak37) |
-| 2 | **Nguyễn Thị Vân Khánh** | 23050183 | Thành viên (Frontend/UI-UX) | ... |
+| 2 | **Nguyễn Thị Vân Khánh** | 23050183 | Thành viên (Frontend/UI-UX) | [@ChanhChanh-307](https://github.com/ChanhChanh-307) |
 
 ---
 
@@ -67,8 +88,10 @@ Bước 2: Tạo môi trường ảo và cài đặt thư viện
 Bash
 
 python -m venv venv
+
 # Windows:
 .\venv\Scripts\activate
+
 # macOS/Linux:
 source venv/bin/activate
 
@@ -134,10 +157,6 @@ Environment Variables: Copy nội dung từ .env.local vào đây (Lưu ý: Thay
 Deploy: Nhấn nút "Deploy" và chờ khoảng 1-2 phút.
 
 📸 Demo Giao Diện
-<div align="center"> <img src="./image.png" alt="Giao diện trang chủ" width="45%" style="margin-right: 10px;"> <img src="./image-1.png" alt="Giao diện thảo luận" width="45%"> </div>
+<div align="center"> <img src="./image.png" alt="Giao diện trang chủ" width="45%"> &nbsp; &nbsp; &nbsp; <img src="./image-1.png" alt="Giao diện thảo luận" width="45%"> </div>
 
-<div align="center">
-
-© 12/2025 - Nhóm 11: Community Forum Sản phẩm thuộc bài tập lớn môn Phát triển ứng dụng mã nguồn mở.
-
-</div>
+<div align="center"> <strong>© 12/2025 - Nhóm 11: Community Forum</strong>
