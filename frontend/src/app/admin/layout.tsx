@@ -18,11 +18,11 @@ export default function AdminLayout({
   const { } = useUser();
 
   useEffect(() => {
-    // 🛑 LOGIC BẢO VỆ MỚI: CHẶT CHẼ HƠN
+  
 
     // 1. Chưa đăng nhập -> Đá về Login
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push("/auth/login");
       return;
     }
 

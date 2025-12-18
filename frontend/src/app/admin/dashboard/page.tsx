@@ -146,13 +146,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
       
-      {/* Ghi chú: API JSON hiện tại chưa trả về số liệu Bài viết (Threads), Comment, Vote.
-        Nếu sau này API update, bạn có thể thêm lại các Card đó ở dưới đây.
-      */}
-      <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-lg text-sm text-yellow-700">
-        <span className="font-bold">Lưu ý:</span> Dữ liệu về Bài viết, Bình luận và Vote hiện chưa có trong phản hồi API.
-      </div>
-
+      
     </div>
   );
 }
