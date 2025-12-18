@@ -156,7 +156,16 @@ Environment Variables: Copy nội dung từ .env.local vào đây (Lưu ý: Thay
 
 Deploy: Nhấn nút "Deploy" và chờ khoảng 1-2 phút.
 
-📸 Demo Giao Diện
-<div align="center"> <img src="./image.png" alt="Giao diện trang chủ" width="45%"> &nbsp; &nbsp; &nbsp; <img src="./image-1.png" alt="Giao diện thảo luận" width="45%"> </div>
+## 📸 Demo Giao Diện
 
-<div align="center"> <strong>© 12/2025 - Nhóm 11: Community Forum</strong>
+<div align="center">
+  <img src="./image.png" alt="Giao diện trang chủ" width="45%">
+  &nbsp; &nbsp; &nbsp;
+  <img src="./image-1.png" alt="Giao diện thảo luận" width="45%">
+</div>
+
+<br/>
+
+<div align="center">
+  <strong>© 12/2025 - Nhóm 11: Community Forum</strong>
+</div>
