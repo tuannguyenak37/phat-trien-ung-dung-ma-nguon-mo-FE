@@ -232,7 +232,7 @@ export default function ThreadCard({ thread }: { thread: IThread }) {
           {thread.title && <h3 className="text-lg font-bold text-gray-900 mb-1.5 leading-snug hover:text-blue-600 transition-colors">{thread.title}</h3>}
           {thread.content && (
             <div className="text-[15px] text-gray-700 whitespace-pre-line leading-relaxed line-clamp-3">
-               {/* Nếu content là HTML thì dùng dangerouslySetInnerHTML, nếu plain text thì render trực tiếp */}
+               
                <span dangerouslySetInnerHTML={{ __html: thread.content }} />
             </div>
           )}

@@ -169,7 +169,7 @@ export default function Navbar() {
                                 <Link href={`/profile/${user.user_id}`} onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors">
                                     <UserCircleIcon className="w-5 h-5" /> Trang cá nhân
                                 </Link>
-                                <Link href="/settings" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                <Link href={`/profile/${user.user_id}`} onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors">
                                     <Cog6ToothIcon className="w-5 h-5" /> Cài đặt
                                 </Link>
                             </div>

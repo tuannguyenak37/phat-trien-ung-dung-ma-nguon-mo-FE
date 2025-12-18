@@ -2,21 +2,25 @@
 
 import React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation"; // Import hook để lấy params hiện tại
+import { useSearchParams, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { categoryService } from "@/lib/API/category";
+
 import {
-  HomeIcon,
-  FireIcon,
-  FolderIcon,
+  Squares2X2Icon,      // Trang chủ
+  ArrowTrendingUpIcon, // Trending
+  ClockIcon,           // Mới nhất
+  RectangleGroupIcon,  // Danh mục
+  TagIcon,             // Thẻ
 } from "@heroicons/react/24/outline";
 
-// Interfaces
+/* =======================
+   Interfaces
+======================= */
 interface Category {
   category_id: string;
   name: string;
   slug: string;
-  description?: string;
 }
 
 interface Tag {
@@ -24,153 +28,209 @@ interface Tag {
   name: string;
 }
 
+/* =======================
+   Menu config
+======================= */
 const menuItems = [
-  { name: "Trang chủ", icon: HomeIcon, href: "/home" },
-  { name: "Trending", icon: FireIcon, href: "/home?sort_by=trending" }, 
-   { name: "Mới nhất", icon: FireIcon, href: "/home?sort_by=newest" }
+  {
+    name: "Trang chủ",
+    icon: Squares2X2Icon,
+    href: "/home",
+    sort: null as string | null,
+  },
+  {
+    name: "Trending",
+    icon: ArrowTrendingUpIcon,
+    href: "/home?sort_by=trending",
+    sort: "trending",
+  },
+  {
+    name: "Mới nhất",
+    icon: ClockIcon,
+    href: "/home?sort_by=newest",
+    sort: "newest",
+  },
 ];
 
-const Sidebar = () => {
-  // 1. Lấy params từ URL để biết cái nào đang active
+export default function Sidebar() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const currentSort = searchParams.get("sort_by");
   const currentTag = searchParams.get("tag");
   const currentCatId = searchParams.get("category_id");
-  const currentSort = searchParams.get("sort_by");
 
-  // 2. Fetch Tags
+  /* =======================
+     Queries
+  ======================= */
   const { data: popularTags } = useQuery({
     queryKey: ["popularTags"],
     queryFn: async () => {
-      const res = await categoryService.tagPopular(); 
-      return res as unknown as Tag[]; 
+      const res = await categoryService.tagPopular();
+      return res as Tag[];
     },
   });
 
-  // 3. Fetch Categories
   const { data: popularCategories } = useQuery({
     queryKey: ["popularCategories"],
     queryFn: async () => {
       const res = await categoryService.categoriesPopular();
-      return res as unknown as Category[];
+      return res as Category[];
     },
   });
 
-  // Helper check active class
-  const isActive = (path: string) => {
-      // Logic đơn giản: check xem đường dẫn hiện tại có khớp không
-      if (path === "/home" && !currentTag && !currentCatId && !currentSort) return true;
-      return false;
+  /* =======================
+     Helpers
+  ======================= */
+  const isMenuActive = (sort: string | null) => {
+    if (
+      sort === null &&
+      pathname === "/home" &&
+      !currentSort &&
+      !currentTag &&
+      !currentCatId
+    ) {
+      return true;
+    }
+    return currentSort === sort;
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 sticky top-20 h-[calc(100vh-5rem)] pr-6 py-2 overflow-y-auto custom-scrollbar">
-      {/* Navigation Menu */}
-      <div className="space-y-1">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">
-          Menu
+    <aside className="hidden lg:flex w-64 shrink-0 flex-col sticky top-20 h-[calc(100vh-5rem)] pr-6 py-3 overflow-y-auto custom-scrollbar">
+      {/* ================= MENU ================= */}
+      <section>
+        <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+          Điều hướng
         </h3>
-        {menuItems.map((item) => {
-             const active = isActive(item.href);
-             return (
+
+        <div className="space-y-1">
+          {menuItems.map((item) => {
+            const active = isMenuActive(item.sort);
+            const Icon = item.icon;
+
+            return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
-                    active 
-                    ? "bg-blue-50 text-blue-600 font-semibold" 
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-xl
+                  transition-all duration-200
+                  ${
+                    active
+                      ? "bg-blue-50 text-blue-700 font-semibold shadow-sm"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }
+                `}
               >
-                <item.icon className={`w-5 h-5 transition-colors ${active ? "text-blue-600" : "group-hover:text-blue-600"}`} />
+                <Icon
+                  className={`w-5 h-5 transition-colors ${
+                    active
+                      ? "text-blue-600"
+                      : "text-gray-400 group-hover:text-blue-600"
+                  }`}
+                />
                 <span className="text-sm">{item.name}</span>
               </Link>
-          )
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </section>
 
-      <div className="my-6 border-t border-gray-100 mx-3"></div>
+      <div className="my-6 mx-3 border-t border-gray-100" />
 
-      {/* Categories Section */}
-      <div className="mb-6">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-3">
+      {/* ================= CATEGORIES ================= */}
+      <section className="mb-6">
+        <h3 className="px-3 mb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
           Danh mục nổi bật
         </h3>
+
         <div className="space-y-1">
           {popularCategories?.map((cat) => {
-            // Check active category
-            const isCatActive = currentCatId === cat.category_id;
-            
+            const active = currentCatId === cat.category_id;
+
             return (
               <Link
                 key={cat.category_id}
-                // CHUYỂN LINK VỀ TRANG CHỦ KÈM PARAM CATEGORY_ID
-                href={`/home?category_id=${cat.category_id}`} 
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${
-                    isCatActive 
-                    ? "bg-blue-50 text-blue-600 font-medium" 
-                    : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
-                }`}
+                href={`/home?category_id=${cat.category_id}`}
+                className={`
+                  group flex items-center gap-3 px-3 py-2 rounded-lg
+                  transition-all
+                  ${
+                    active
+                      ? "bg-blue-50 text-blue-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                  }
+                `}
               >
-                <FolderIcon className={`w-4 h-4 ${isCatActive ? "text-blue-500" : "text-gray-400 group-hover:text-blue-500"}`} />
-                <span className="text-sm truncate" title={cat.name}>
-                  {cat.name}
-                </span>
+                <RectangleGroupIcon
+                  className={`w-4 h-4 transition-colors ${
+                    active
+                      ? "text-blue-500"
+                      : "text-gray-400 group-hover:text-blue-500"
+                  }`}
+                />
+                <span className="text-sm truncate">{cat.name}</span>
               </Link>
-            )
+            );
           })}
-          
+
           {!popularCategories && (
             <div className="px-3 space-y-2">
-               <div className="h-8 bg-gray-100 rounded-lg w-full animate-pulse"></div>
-               <div className="h-8 bg-gray-100 rounded-lg w-3/4 animate-pulse"></div>
+              <div className="h-8 rounded-lg bg-gray-100 animate-pulse" />
+              <div className="h-8 w-3/4 rounded-lg bg-gray-100 animate-pulse" />
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* Tags Section */}
-      <div>
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-3">
+      {/* ================= TAGS ================= */}
+      <section>
+        <h3 className="px-3 mb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
           Thẻ nổi bật
         </h3>
+
         <div className="flex flex-wrap gap-2 px-3">
           {popularTags?.map((tag) => {
-             // Check active tag
-             const isTagActive = currentTag === tag.name;
+            const active = currentTag === tag.name;
 
-             return (
-                <Link
-                  key={tag.tag_id}
-                  // CHUYỂN LINK VỀ TRANG CHỦ KÈM PARAM TAG
-                  href={`/home?tag=${tag.name}`}
-                  className={`text-xs font-medium px-2.5 py-1.5 rounded-lg cursor-pointer border transition-all ${
-                      isTagActive
+            return (
+              <Link
+                key={tag.tag_id}
+                href={`/home?tag=${tag.name}`}
+                className={`
+                  inline-flex items-center gap-1
+                  rounded-lg border px-2.5 py-1.5 text-xs font-medium
+                  transition-all
+                  ${
+                    active
                       ? "bg-blue-100 text-blue-700 border-blue-200 shadow-sm"
                       : "bg-gray-50 text-gray-600 border-gray-100 hover:bg-white hover:border-blue-200 hover:text-blue-600 hover:shadow-sm"
-                  }`}
-                >
-                  #{tag.name}
-                </Link>
-             )
+                  }
+                `}
+              >
+                <TagIcon className="w-3 h-3 opacity-70" />
+                {tag.name}
+              </Link>
+            );
           })}
-           
-           {!popularTags && (
-             <div className="flex gap-2 px-3">
-                <div className="h-6 w-12 bg-gray-100 rounded-md animate-pulse"></div>
-                <div className="h-6 w-16 bg-gray-100 rounded-md animate-pulse"></div>
-             </div>
+
+          {!popularTags && (
+            <div className="flex gap-2">
+              <div className="h-6 w-12 rounded-md bg-gray-100 animate-pulse" />
+              <div className="h-6 w-16 rounded-md bg-gray-100 animate-pulse" />
+            </div>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="mt-auto px-3 pt-6 pb-4">
-        <p className="text-[10px] text-gray-400">
-          © 2025 Messmer Inc. <br />
+      {/* ================= FOOTER ================= */}
+      <footer className="mt-auto px-3 pt-6 pb-4">
+        <p className="text-[10px] leading-relaxed text-gray-400">
+          © 2025 Messmer Inc.
+          <br />
           All rights reserved.
         </p>
-      </div>
+      </footer>
     </aside>
   );
-};
-
-export default Sidebar;
+}

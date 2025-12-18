@@ -1,6 +1,6 @@
 // src/components/layout/RightPanel.tsx
 "use client";
-
+import TrendingWidget from "./TrendingWidget";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -111,7 +111,7 @@ const UserWidget = () => {
            ) : (
              <div className="text-center py-3 bg-blue-50/30 rounded-xl border border-dashed border-blue-200 hover:border-blue-300 transition-colors cursor-pointer group/bio">
                <p className="text-xs text-slate-400 italic group-hover/bio:text-slate-500">"Chưa có giới thiệu bản thân"</p>
-               <Link href="/settings" className="text-xs text-blue-500 font-bold hover:underline mt-1 block">
+               <Link href={`/profile/${user.user_id}`}  className="text-xs text-blue-500 font-bold hover:underline mt-1 block">
                  + Thêm mô tả ngay
                </Link>
              </div>
@@ -122,70 +122,8 @@ const UserWidget = () => {
   );
 };
 
-// --- 2. TRENDING WIDGET (Soft Blue Style) ---
-const TrendingWidget = () => (
-  // Sticky top để khi scroll nó trượt theo (top-24 để tránh Navbar)
-  <div className="rounded-2xl border border-blue-100 bg-white overflow-hidden shadow-sm shadow-blue-50 sticky top-24">
-    {/* Header */}
-    <div className="px-5 py-4 border-b border-blue-50 flex items-center justify-between bg-slate-50/50">
-      <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-        <FireIcon className="w-5 h-5 text-orange-500" />
-        Chủ đề nổi bật
-      </h3>
-    </div>
 
-    {/* List */}
-    <ul className="divide-y divide-blue-50">
-      {[
-        {
-          title: "Đánh giá chi tiết NextJS 14 App Router",
-          replies: 342,
-          tag: "Tech",
-          // Màu tag nhẹ nhàng hơn
-          color: "bg-blue-50 text-blue-600 border-blue-100",
-        },
-        {
-          title: "Làm sao để tối ưu SEO cho React?",
-          replies: 128,
-          tag: "Hỏi đáp",
-          color: "bg-emerald-50 text-emerald-600 border-emerald-100",
-        },
-        { 
-          title: "Góc khoe góc làm việc tháng 12", 
-          replies: 89, 
-          tag: "Showcase",
-          color: "bg-violet-50 text-violet-600 border-violet-100",
-        },
-      ].map((item, i) => (
-        <li key={i}>
-          <Link
-            href="#"
-            className="block px-5 py-3.5 hover:bg-blue-50/40 transition-colors group"
-          >
-            <h4 className="text-[13px] font-semibold text-slate-700 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
-              {item.title}
-            </h4>
-            <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
-              <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${item.color}`}>
-                {item.tag}
-              </span>
-              <span className="flex items-center gap-1 group-hover:text-blue-500 transition-colors">
-                <ChatBubbleLeftRightIcon className="w-3.5 h-3.5" /> {item.replies}
-              </span>
-            </div>
-          </Link>
-        </li>
-      ))}
-    </ul>
 
-    {/* Footer Widget */}
-    <div className="p-3 bg-slate-50/50 border-t border-blue-50">
-      <button className="w-full py-2 text-xs font-bold text-slate-600 hover:text-blue-600 hover:bg-white rounded-lg transition-all flex items-center justify-center gap-2 border border-transparent hover:border-blue-100 hover:shadow-sm">
-        Xem tất cả <ArrowTrendingUpIcon className="w-3.5 h-3.5" />
-      </button>
-    </div>
-  </div>
-);
 
 // --- 3. MAIN COMPONENT ---
 const RightPanel = () => {
