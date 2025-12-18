@@ -53,12 +53,13 @@
 ## 🚀 3. Hướng Dẫn Cài Đặt (Local Development)
 
 <details>
-<summary><strong>🅰️ Cài đặt Backend (API & Database) - <i>Bấm để xem</i></strong></summary>
+<summary><strong>🅰️ Cài đặt Backend (API & Database) - Bấm để xem</strong></summary>
+
 <br>
 
 **Bước 1: Clone Repository**
 ```bash
-git clone [https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-BE.git](https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-BE.git)
+git clone https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-BE.git
 cd phat-trien-ung-dung-ma-nguon-mo-BE
 Bước 2: Tạo môi trường ảo (Virtual Env)
 
@@ -90,14 +91,13 @@ uvicorn main:app --reload
 # Server chạy tại: http://localhost:8000
 </details>
 
-<details> <summary><strong>🅱️ Cài đặt Frontend (Client) - <i>Bấm để xem</i></strong></summary>
-
+<details> <summary><strong>🅱️ Cài đặt Frontend (Client) - Bấm để xem</strong></summary>
 
 Bước 1: Clone Repository
 
 Bash
 
-git clone [https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-FE.git](https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-FE.git)
+git clone https://github.com/tuannguyenak37/phat-trien-ung-dung-ma-nguon-mo-FE.git
 cd phat-trien-ung-dung-ma-nguon-mo-FE
 Bước 2: Cài đặt Packages
 
@@ -122,7 +122,6 @@ npm run dev
 
 ☁️ 4. Hướng Dẫn Deploy (Vercel)
 <details> <summary><strong>👉 Xem hướng dẫn deploy Frontend lên Vercel</strong></summary>
-
 
 Chuẩn bị: Push code Frontend lên GitHub.
 
